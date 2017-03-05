@@ -1,0 +1,17 @@
+# OS Files
+.DS_Store*
+
+# Misc Files
+*.txt
+*.xml
+*.docx
+
+# Latex
+*.aux
+*.bbl
+*.blg
+*.toc
+*.lof
+*.log
+*.out
+*.cut
