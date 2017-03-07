@@ -1,0 +1,23 @@
+%!TEX root = ../dissertation.tex
+\chapter{Experiments}
+\section{Symmetry-aware Map Optimization}
+As one of our two main data structures, the memory usage of our symmetry-aware map is something that was very important to us.
+We found that we often had trouble running large data sets because we would run out of memory before certifying the optimal rule list.
+In these long runs, our permutation map would grow to be hundreds of thousands or millions of entries large.
+Thus, carrying a lot of memory overhead with each node led to serious memory bloat and ran us out of memory.
+This section explores some of the techniques we used to handle this memory bloat.
+
+Our symmetry-aware map was originally an STL map with keys as STL sets of size_t and values as pairs of STL vectors of size_t and a double.
+The first problem is that the STL map is implemented as a red-black tree, meaning every node had the overhead of multiple pointers pointing to its children.
+This can be solved using a STL unordered map, which is implemented as a hashtable.
+That has some overhead, since it will allocate more buckets than are filled, but nowhere near to the two pointers per node of overhead of the STL map.
+
+Next, the representation of the rule ids no longer had to be size_t.
+We made an assumption that we'll never have more than 65000 rules, so we used unsigned shorts for our rule ids. This means that our final data structure was able to use 
+
+
+\section{Ablation--how much does each bound/optimization help?}
+
+\section{Templates vs Inheritance}
+
+\section{Parallelization}
