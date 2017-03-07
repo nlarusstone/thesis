@@ -1,5 +1,6 @@
 %!TEX root = ../dissertation.tex
 \chapter{Experiments}
+
 \section{Symmetry-aware Map Optimization}
 As one of our two main data structures, the memory usage of our symmetry-aware map is something that was very important to us.
 We found that we often had trouble running large data sets because we would run out of memory before certifying the optimal rule list.
@@ -13,11 +14,63 @@ This can be solved using a STL unordered map, which is implemented as a hashtabl
 That has some overhead, since it will allocate more buckets than are filled, but nowhere near to the two pointers per node of overhead of the STL map.
 
 Next, the representation of the rule ids no longer had to be size_t.
-We made an assumption that we'll never have more than 65000 rules, so we used unsigned shorts for our rule ids. This means that our final data structure was able to use 
+We made an assumption that we'll never have more than 65000 rules, so we used unsigned shorts for our rule ids.
+This means that our final data structure was able to use only 2 bytes per rule id instead of 8 bytes for a size_t.
+Since we're keeping two different representations of the prefix--the canonical order and the actual order of the prefix, and these prefixes can be of length on the order of 5 rules, saving 6 bytes per rule translates to a lot of 
 
+Our initial implementation used an STL set as the key, which carries a lot of overhead because of all the operations that a set needs to support.
+For a prefix of length 6, the corresponding key therefore takes up 
+After starting with the STL set, we transition to a sorted STL vector.
+This reduced overhead because a vector is essentially just an array with a little bit of overhead.
+However, all of these STL containers support a broader range of operations than we needed.
+All we needed was some way to compare the canonical orders and determine if they were the same.
+We eventually achieved this simply by allocating a chunk of memory that held the length of the prefix and the sorted order of the ids.
+This means that, for a prefix of length 6, we use 14 bytes for the key.
+
+We had a similar set of issues with our values for the permutation map.
+Beginning with a STL vector to keep track of the actual order of the rules in the prefix, we again wanted to remove the overhead incurred by the fact that STL containers need to support a wider array of operations than we needed.
+Thus, we could use a similar technique to what we did with the keys to keep track of the prefix order.
+However, in fact, we can do even better because we already have a canonical representation of the rules--all we need in the value was the ordering of those rules.
+Thus, we can use unsigned chars instead of unsigned shorts to record the index of where the rules in the canonical order are in the prefix.
+
+However, these optimizations all pertained to the symmetry-aware map with prefix keys.
+Dealing with the captured vector keys required a different approach.
+Our captured vectors were of type mpz, and since unordered_map requires a custom hash for unsupported types, we had to find a way around that.
+STL has some hash functions for built in types, so we initially wrote a function to convert between our VECTOR type and a $std::vector<bool>$.
+This conversion turned out to be very slow, especially as we were running on data sets with many samples, meaning these mpz types were fairly memory intensive.
+Once we wrote our own hash function and were able to use our mpz type again, it became much faster.
+
+\section{Templates vs Inheritance}
+Our system has a lot of different modular parts--different priority metrics, symmetry-aware map types, or information stored in trie nodes.
+Since we were using a C++ 
+We began by using a template system.
+We believe that it would be the easiest way to switch out different components of the system.
+We switch to inheritance and the executable became much smaller.
+Runtimes didn't really change.
+The code was cleaner.
 
 \section{Ablation--how much does each bound/optimization help?}
 
-\section{Templates vs Inheritance}
+We ran a number of experiments where we only took out one component and measured the effects on the time and memory of our algorithm.
+We find that each optimization and bound is extremely important to concluding the algorithm quickly and in a reasonable amount of memory.
+
+\subsection{Full CORELS system}
+
+\subsection{Priority Queue}
+
+\subsecton{Support Bounds}
+
+\subsection{Symmetry-aware map}
+
+\subsection{Lookahead Bound}
+
+\subsection{Equivalent points bound}
+
+\subsection{Objective Bound}
 
 \section{Parallelization}
+The tree structure of our prefix trie contributes itself nicely to parallelization.
+We began by trying to parallelize the inner loop of evaluate\_children.
+This had too much contention.
+
+Instead, we can parallelize the search over the tree itself.

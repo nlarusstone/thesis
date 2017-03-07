@@ -348,14 +348,13 @@ This garbage collection allows us to limit the memory usage of the trie, though 
 \State $obj \gets 0$
 \State $bestRL \gets NULL$
 \State $T \gets initializeTree()$
-\State $Q \gets queue(\,[T->root()\,])$
+\State $Q \gets queue(\,[T.root()\,])$
 \State $P \gets map(\{\})$
 \While {$Q$ not empty}
 	\State $node \gets Q.pop()$
-	\State $newObj \gets incremental(node, T, Q, P)$ \Comment{Evaluate all of node's children}
-	\If {$newObj < obj$}
-		\State $obj \gets newObj$
-		\State $bestRL \gets node.getRuleList()$
+	\State $oldObj \gets T.min\_objective()$
+	\State $incremental(node, T, Q, P)$ \Comment{Evaluate all of node's children}
+	\If {$T.min\_objective() < oldObj$}
 		\State $T.garbageCollect()$
 	\EndIf
 \EndWhile
@@ -369,13 +368,40 @@ This garbage collection allows us to limit the memory usage of the trie, though 
 \label{alg:incremental}
 \begin{algorithmic}
 \normalsize
-\State \textbf{Input:} Node to be evaluated~n,
-prefix tree~T,
-queue~Q,
-symmetry-aware map~P
+\State \textbf{Input:} Node to be evaluated~$parent$,
+prefix tree~$T$,
+queue~$Q$,
+symmetry-aware map~$P$
 \State \textbf{Output:} newObj~Best objective in the tree\\
-
-\State 
+\State $prefix \gets parent$.prefix()
+\State $t \gets \lambda *$ nsamples \Comment{This forms the threshold for our support bounds}
+\For {$rule \notin prefix$}
+	\State $rlist \gets prefix$.append($rule$)
+	\State $cap \gets parent$.not\_captured() $\wedge rule$.not\_captured()
+	\If {$|cap| < t$} \Comment{Minimum support bound}
+		\State continue
+	\EndIf
+	\State $cap\_0 \gets cap \wedge T->label_0$ \Comment{Record how many zeros the new rule captures}
+	\State $cap\_correct \gets max\{|captured\_zeros|, |captured| - |captured\_zeros|\}$
+	\If {$|captured\_correct| < threshold$} \Comment{Minimum correct support bound}
+		\State continue
+	\EndIf
+	\State $lower\_bound = parent->lower\_bound - parent->minority + |captured| - |captured_correct| / nsamples + c$
+	\If {$lower_bound  >= T->min\_objective()$} \Comment{Objective bound}
+		\State continue
+	\EndIf
+	\If {$objective < T->min\_objective()$} \Comment{Update minimum objective}
+		\State continue
+	\EndIf
+	\If{$lower\_bound + c >= T->min\_objective()$} \Comment{Lookahead bound}
+		\State continue
+	\EndIf
+	\State $n \gets P->insert(rlist)$ \Comment{Symmetry-aware map handles permutation bound for us}
+	\If {$n$}
+		\State $T->insert(n)$
+		\State $Q->push(n)$
+	\EndIf
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
@@ -639,6 +665,11 @@ $ad_{nodes}$ & 104857488 & 54.3 \% & 88165880 & 45.7 \% & 38.948489 &  0.81078\\
 \hline
 \end{tabular}
 \end{center}
+
+ ./bbcache -c 1 -n 10000000 -p 1 -r 0.01 ../data/compas.out ../data/compas.label ../data/compas.minor
+TREE mem usage: 355815632, max mem usage: 749862630
+PMAP mem usage: 161689645, max mem usage: 188028213
+QUEUE mem usage: 16384, max mem usage: 32760
 
 \subsection{Parallelizing Execution}
 
