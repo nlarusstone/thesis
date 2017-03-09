@@ -23,63 +23,64 @@
 We begin by describing each of the three main data structures used to run our algorithm--a prefix trie, a symmetry-aware map, and a queue. 
 Then, we 
 
-\subsection{Prefix Trie}
-The prefix trie is a custom C++ class which is used as a cache to keep track of rule lists we have already evaluated. 
+\section{Prefix Trie}
+The prefix trie is a custom C++ class and is used as a cache to keep track of rule lists we have already evaluated. 
 Each node in the trie contains the metadata associated with that corresponding rule list. 
 This metadata includes bookkeeping information such as what child rule lists are feasible as well as information such as the lower bound and prediction for that rule list.
-In addition to our BaseNode class, there are two different node types that we use in our algorithm.
-Firstly, we implement a CuriousNode class that has an additional field that tracks the curiosity of a given prefix.
-The curiosity metric is the one described in Chapter \ref{bounds}.
-The curiosity is used to determine the order that prefixes on the queue are explored.
-Secondly, we implement a CapturedNode class that extends on the CuriousNode by having an additional field keeping track of the captured vector for that prefix.
-This allows us to speed up our incremental computations at the expense of using more memory per node (otherwise we have to recompute this vector every time we have a computation).
+In addition to our base trie class, we implemented two different node types that we use in our algorithm.
+First, we implemented a class that has an additional field that tracks the curiosity of a given prefix as defined in \ref{ch:definitions}.
+Curiosity is used by our queue to determine the order that prefixes are explored.
+Since the curiosity field is just a double, the memory overhead is minimal and the speed-up of using curiosity as opposed to BFS is sizable (see \ref{exp:priority}).
+We also implemented a class that has an additional field keeping track of the captured vector for that prefix.
+This captured vector has length $nsamples$, which means it is memory expensive.
+However, using the captured vector allows us to speed up our incremental computations because we would otherwise have to recompute this vector every time we used that prefix.
 
-\subsection{Queue}
-The various node types determine what type of search policy we use to explore the search space.
-We use a STL C++ priority queue to hold all of the leaves of the trie that still need to be explored.
-We implement a number of different scheduling schemes including BFS, DFS, and a priority queue.
-The priority queue can be ordered by curiosity, the objective of a prefix, or the lower bound of a prefix.
-We also have a stochastic exploration process that bypasses the use of a queue by walking down the trie, randomly choosing a child each time, until a leaf is chosen to be explored.
-We find that ordering by curiosity will often, but not always, lead to a faster runtime than using BFS.
+\section{Queue}\label{sec:queue}
+Our queue support many different types of search policies that we can use to explore the search space.
+We implement a number of different scheduling schemes including BFS, DFS, various priority metrics, and a stochastic exploration process.
+Due to our use of incremental computation, our queue contains pointers to leaves in the trie.
+The search process involves selecting which leaf node to explore.
+The stochastic exploration process bypasses the use of a queue by performing random walks on the trie until a leaf is reached.
+Our other scheduling schemes use a STL C++ priority queue to hold and order all of the leaves of the trie that still need to be explored.
+Our priority metrics can be ordered by curiosity, the objective of a prefix, or the lower bound of a prefix.
+We find that using an exploitation strategy such as ordering by curiosity or lower bound will usually lead to a faster runtime than using BFS.
 
-Since we do not have access to the container underlying the queue, we cannot randomly access elements in the queue, even if we have a pointer to the leaf node in the prefix trie.
-Thus, we run into a problem where we may delete something in the prefix trie that is currently in the queue, but have no way to update the queue.
-We deal with this by lazily deleting nodes from the prefix trie.
-This means we mark the node as deleted in the trie, but don't actually delete the physical node until it has been popped off of the queue.
+In C++ the priority queue is a wrapper container that prevents access to the container underlying the queue.
+Therefore we cannot access elements in the middle of the queue, even if we have know the value that we're trying to access..
+Thus, we run into a problem where we may delete something in the prefix trie that is currently in the queue but have no way to update the queue.
+We deal with this by lazily marking nodes as deleted in the prefix trie without deleting the physical node until it has been popped off of the queue.
 As Fig \ref{fig:queue_gc} shows, this leads to a situation where our logical queue is actually smaller than the physical queue.
 
 \begin{figure}[t!]
 \begin{center}
 \includegraphics[width=0.65\textwidth]{figs/ela_compas-queue-cache-size-insertions.png}
 \end{center}
-\caption{Difference between logical cache and physical cache}
+\caption{Size of prefix trie, logical queue, and physical queue over the execution of our algorithm. Note that the gap between the logical queue and the physical queue is due to our lazy garbage collection}
 \label{fig:queue_gc}
 \end{figure}
 
-\subsection{Symmetry-aware map}
-We implement the symmetry-aware map as an STL unordered\_map. 
+\section{Symmetry-aware map}
+We implement our symmetry-aware map as an STL unordered\_map.
 We use this data structure to implement the permutation bound described in \ref{def:perm-bound}.
-We have two different versions of the map with different keys that both allow permutations to be compared and pruned.
-In both cases, the values contain the actual ordering of the rules that represents the current best prefix for that permutation.
-In the first version, keys to the map are represented as the canonical order of rule lists: i.e. the lists 3-2-1 and 2-3-1 both map to 1-2-3.
-The second version has keys that represent the captured data points.
+We have two different versions of the map with different key types that allow permutations to be compared and pruned.
+In both cases, the values consist of the best lower bound and the actual ordering of the rules that is best for that permutation.
+In the first version, keys to the map are represented as the canonical order of the rules: i.e. the lists 3-2-1 and 2-3-1 both map to 1-2-3.
+The second version has keys that represent the captured vector.
 Our earlier permutation bound was based off of the fact that different permutations capture the same data, so this type of key will again be equivalent for the rule lists 3-2-1 and 2-3-1.
-Representing keys with captured vectors could potentially match more permutations, but requires more memory.
-Since most data sets have a large amount of data, the keys representing the canonical ordering are usually more efficient.
-In general, for long runs of our algorithm, the permutation map dominates our memory usage.
+Representing keys with captured vectors could potentially match more permutations since two prefixes may not be permutations of each other but might capture the same data points and therefore fall under the permutation bound.
+However, most data sets have a large amount of data, so the keys representing the captured vector are very memory intensive.
+Despite only supporting one bound, the permutation map plays a significant role in our memory usage.
 
-\subsection{Incremental execution}
-Our program executes as follows. 
+\section{Incremental execution}
+We detail the execution of our program below.
+Our program ends when all leaves of the trie have been explored and there is nothing else in our queue.
+We can also choose to not receive the full certificate of optimality by exiting execution when a certain number of rule lists are in the trie.
 While there are still leaves of the trie to be explored, we use our scheduling policy to select the next rule list to evaluate.
-Then, for every rule that is not already in this rule list, we calculate its lower bound, objective, and other metrics that would occur if the rule were added to the end of the rule list.
-If the lower bound is greater than the minimum objective, meaning this new rule list could never be better than one we have already seen, we don't insert the new rule list into the tree or queue.
-We next check if there is a better permutation of this rule list in the permutation map and discard the new rule list if it is not better than the rule list we already have in the permutation map.
-If our new rule list is better, then we insert it into the permutation map, the tree, and the queue and update the minimum objective if necessary.
-
-Every time we update the minimum objective, we garbage collect on the trie.
-We do this by traversing from the root the all of the leaves, deleting any subtrees of nodes with a lower bound that is larger than the minimum objective.
-In addition, if we encounter a node with no children, we prune upwards--deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
-This garbage collection allows us to limit the memory usage of the trie, though garbage collection is not triggered too often.
+Then, for every rule that is not already in this parent rule list, we calculate the lower bound, objective, and other metrics for the potential child rule list consisting of the new rule appended to the parent rule list.
+We check the support bounds, the hierarchal objective bound, the permutation bound, and the lookahead bound.
+If the child rule list has a lower bound that is better than all of these bounds, then we insert it into the permutation map, the tree, and the queue and update the minimum objective if necessary.
+Otherwise, we do not insert it into any of our data structures and we continue to the next potential rule to add, having excluded a rule list from being optimal.
+After evaluating all the rules we could add to our parent rule list, we return to the main loop and look at the next leaf of the trie.
 
 \begin{algorithm}[t!]
   \caption{Branch-and-bound for learning rule lists}
@@ -146,7 +147,28 @@ symmetry-aware map~$P$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Memory tracking}
+\section{Garbage Collection}
+Every time we update the minimum objective, we garbage collect on the trie.
+We do this by traversing from the root the all of the leaves, deleting any subtrees of nodes with a lower bound that is larger than the minimum objective.
+In addition, if we encounter a node with no children, we prune upwards--deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
+This garbage collection allows us to limit the memory usage of the trie, though garbage collection is not triggered too often.
+
+\section{Templates vs Inheritance}
+Our system has a lot of different modular parts--different priority metrics, symmetry-aware map types, or information stored in trie nodes.
+Since we were using C++, we took advantage of its templating system to achieve this modularity.
+We believed that it would be the easiest way to switch out different components of the system, but did not think about the ramifications of this choice.
+Due to code duplication, large amount of templates can lead to a much larger execution.
+Indeed, with a pure templating system, our executable was 253732 bytes.
+
+Our other alternative way to maintain modularity was to take advantage of C++'s class system and use inheritance and polymorphism.
+Now, instead of having a template argument for each data structure, we can have a base data structure type and then implement each of our extensions as subclasses.
+Therefore, we can write all of our functions to take the base class as arguments and then pass in the specialized subclasses based on command line arguments.
+This requires the use of virtual functions, which are potentially a bit slower than regular functions because they require a vtable lookup.
+With a pure inheritance framework, our executable was 171288 bytes.
+However, even with the inheritance framework, the runtime of our algorithm was not significantly different from the template runtime.
+Thus, since inheritance provided a much cleaner code base to work with, we decided to switch to an inheritance based framework.
+
+\section{Memory tracking}
 We track memory through the use of C++11 custom allocators.
 Our allocators essentially just wrap malloc and then log where the allocation is coming from--the trie, the map, or the queue.
 We validated the accuracy of this memory tracking by running the program under Valgrind's massif heap profiler tool and comparing the outputs.

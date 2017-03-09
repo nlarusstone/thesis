@@ -40,15 +40,6 @@ STL has some hash functions for built in types, so we initially wrote a function
 This conversion turned out to be very slow, especially as we were running on data sets with many samples, meaning these mpz types were fairly memory intensive.
 Once we wrote our own hash function and were able to use our mpz type again, it became much faster.
 
-\section{Templates vs Inheritance}
-Our system has a lot of different modular parts--different priority metrics, symmetry-aware map types, or information stored in trie nodes.
-Since we were using a C++ 
-We began by using a template system.
-We believe that it would be the easiest way to switch out different components of the system.
-We switch to inheritance and the executable became much smaller.
-Runtimes didn't really change.
-The code was cleaner.
-
 \section{Ablation--how much does each bound/optimization help?}
 
 We ran a number of experiments where we only took out one component and measured the effects on the time and memory of our algorithm.
@@ -56,7 +47,7 @@ We find that each optimization and bound is extremely important to concluding th
 
 \subsection{Full CORELS system}
 
-\subsection{Priority Queue}
+\subsection{Priority Queue} \label{exp:priority}
 
 \subsecton{Support Bounds}
 

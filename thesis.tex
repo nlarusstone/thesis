@@ -345,20 +345,21 @@ This garbage collection allows us to limit the memory usage of the trie, though 
 \label{alg:branch-and-bound}
 \begin{algorithmic}
 \normalsize
-\State $obj \gets 0$
-\State $bestRL \gets NULL$
+\State \textbf{Output:} Outputs the best rule list and its objective\\
+\State $opt \gets NULL$
 \State $T \gets initializeTree()$
 \State $Q \gets queue(\,[T.root()\,])$
 \State $P \gets map(\{\})$
 \While {$Q$ not empty}
-	\State $node \gets Q.pop()$
-	\State $oldObj \gets T.min\_objective()$
-	\State $incremental(node, T, Q, P)$ \Comment{Evaluate all of node's children}
-	\If {$T.min\_objective() < oldObj$}
-		\State $T.garbageCollect()$
+	\State $node \gets Q$.pop(\,)
+	\State $oldObj \gets T$.minObjective(\,)
+	\State incremental($node, T, Q, P$) \Comment{Evaluate all of node's children}
+	\If {$T$.minObjective(\,) $< oldOb$j}
+		\State $opt \gets T$.bestRuleList(\,)
+		\State $T$.garbageCollect(\,)
 	\EndIf
 \EndWhile
-
+\State \Return $opt, T$.minObjective(\,)
 
 \end{algorithmic}
 \end{algorithm}
@@ -372,16 +373,16 @@ This garbage collection allows us to limit the memory usage of the trie, though 
 prefix tree~$T$,
 queue~$Q$,
 symmetry-aware map~$P$
-\State \textbf{Output:} newObj~Best objective in the tree\\
-\State $prefix \gets parent$.prefix()
+\State \textbf{Output:} None--updates best objective in the tree\\
+\State $prefix \gets parent$.prefix(\,)
 \State $t \gets \lambda *$ nsamples \Comment{This forms the threshold for our support bounds}
 \For {$rule \notin prefix$}
 	\State $rlist \gets prefix$.append($rule$)
-	\State $cap \gets parent$.not\_captured() $\wedge rule$.not\_captured()
+	\State $cap \gets parent$.notCaptured(\,) $\wedge rule$.notCaptured(\,)
 	\If {$|cap| < t$} \Comment{Minimum support bound}
 		\State continue
 	\EndIf
-	\State $cap\_0 \gets cap \wedge T->label_0$ \Comment{Record how many zeros the new rule captures}
+	\State $capZero \gets cap \wedge T$.zeroLabel(\,) \Comment{Record how many zeros the new rule captures}
 	\State $cap\_correct \gets max\{|captured\_zeros|, |captured| - |captured\_zeros|\}$
 	\If {$|captured\_correct| < threshold$} \Comment{Minimum correct support bound}
 		\State continue

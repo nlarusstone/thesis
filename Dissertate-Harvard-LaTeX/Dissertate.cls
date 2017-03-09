@@ -202,7 +202,7 @@
 \renewcommand{\frontmatter}{
 	\input{frontmatter/personalize}
 	\maketitle
-	\copyrightpage
+	%\copyrightpage
 	\abstractpage
     \contentspage
 	% \listoffigures % optional
