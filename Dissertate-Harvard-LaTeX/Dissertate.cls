@@ -305,3 +305,20 @@
         \include{endmatter/colophon}
     \end{spacing}
 }
+
+% Nicholas' Customizations
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{amsmath,amsthm}
+%\usepackage{amsfonts}
+%\usepackage{caption}
+\usepackage{comment}
+%\usepackage{graphicx,verbatim}
+\usepackage{listings}
+%\usepackage{subcaption}
+
+\newcommand{\x}{\mathbf{x}}
+\def\bif{\bf if~}
+\def\belif{{\bf else if~}}
+\def\bthen{{\bf then predict~}}
+\def\belse{{\bf else predict~}}

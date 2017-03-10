@@ -47,7 +47,9 @@ We use a \textit{regularization} term, which is a constant times the length of t
 This has the effect of preventing overfitting on training data sets as well as preventing extremely long, and therefore uninterpretable, rule lists.
 While the objective is related to accuracy (a higher accuracy means a lower objective), we will be optimizing over the objective function instead of just the accuracy in order to get the benefits of the regularization term.
 
-$$objective(RL) = loss(RL) + \lambda * len(RL)$$ 
+\begin{math}
+objective(RL) = loss(RL) + c * len(RL)
+\end{math}
 
 \section{Bounds}\label{sec:bounds}
 For a set of $n$ rules, there are $n!$ possible rule lists.
@@ -123,7 +125,9 @@ We define a new metric, \textit{curiosity}, that blends together both exploratio
 Curiosity is a function of both the lower bound and the number of samples captured.
 This prioritizes rule lists that still have many samples left to capture (exploration) while also pursuing rule lists with promising lower bounds (exploitation).
 
-$$curiosity(RL) = lowerBound(RL) - \lambda * (len(RL) - 1)  * (nsamples / |captured(RL)|);$$
+\begin{math}
+curiosity(RL) = lowerBound(RL) - c * (len(RL) - 1)  * (nsamples / |captured(RL)|)
+\end{math}
 
 \section{Remaining Search Space}
 One metric for tracking the efficacy of our optimizations will be seeing how quickly we reduce the remaining search space.

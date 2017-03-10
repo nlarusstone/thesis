@@ -1,5 +1,6 @@
-\documentclass[]{article}
-\usepackage{algorithm, algpseudocode}
+\documentclass[]{report}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 \usepackage{amsmath,amssymb,amsthm,amsfonts}
 \usepackage{caption}
 \usepackage{comment}
@@ -32,32 +33,37 @@ Abstract
 
 We demonstrate a new algorithm that finds an optimal rule list as well as providing proof of that optimality. Rule lists, which are lists composed of If-Then statements, are similar to decision tree classifiers and are useful because each step in the model's decision making process is understandable by humans. Our algorithm, called CORELS, finds the optimal rule list through the use of three types of bounds: bounds inherent to the rules themselves, bounds based on the current best solution, and bounds based on symmetry between rule lists. We propose novel data structures to minimize the memory usage and runtime of our algorithm on this exponentially difficult problem. One advantage of our algorithm is that it generates not only the optimal rule list and a certificate of optimality, but also the entire solution space of nearly optimal solutions. Our algorithm therefore allows for the analysis and discovery of all optimal and near-optimal solutions on problems requiring human-interpretable algorithms.
 
-\section{Introduction}
+\chapter{Introduction}
+\label{introduction}
 
-As machine learning continues to grow in importance, the interpretability of predictive models remains a crucial problem.
-Our goal is to build models that are highly predictive but in which each step of the model's decision making process can also be understood by humans.
+As computing power continues to grow, combinatorial optimization problems that may have been out of the reach of earlier computational power can now be feasibly executed.
+The goal of this thesis is to discuss a number of data structure optimizations that allow for the completion of medium to large scale combinatorial optimization problems.
+This work builds off of the theoretical bounds and implementation found in Angelino et. al \cite{AngelinoLaAlSeRu17}.
+While the techniques found in this thesis are specific to a given machine learning technique, it is our hope that they can be generalized to other combinatorial optimization problems.
+
+We work in the realm of machine learning, specifically focusing on the interpretability of predictive models.
+Our algorithm produces models that are highly predictive but in which each step of the model's decision making process can also be understood by humans.
 Machine learning models such as neural nets or support vector machines are able to achieve stunning predictive accuracy, but the reasons for these predictions remain unintelligible to a human user.
-This lack of interpretability is important because models that are not understood by humans can have hidden bias in their predictive decision making.
-A recent ProPublica article found racial bias in the use of black box machine learning models used for advising criminal sentencing \cite{LarsonMaKiAn16}.
-Northepointe, the company which provides a black box model called COMPAS argues that their use of a black box model is necessitated by the fact that they can achieve better accuracy through the use of that model.
-This thesis is part of a body of work that hopes to prove that interpretability can be achieved without sacrificing accuracy.
-In particular, this thesis will examine the data structure optimizations used to run this algorithm efficiently.
+This lack of interpretability is important because models that are not understood by humans may have hidden bias in their predictive decision making.
+A recent ProPublica article found racial bias in the use of a black box machine learning model used for advising criminal sentencing \cite{LarsonMaKiAn16}.
+Northepointe, the company which provides COMPAS (the black box model), argues that their use of a black box model is necessitated by the fact that they can achieve better accuracy through the use of that model.
+This thesis is part of a body of work that hopes to disprove that statement by showing that it is possible to build interpretable machine learning models without sacrificing accuracy.
 
 To achieve interpretability, we use \emph{rule lists}, also known as decision lists, which are lists comprised of \emph{if-then} statements \cite{Rivest87}. 
-This structure allows for predictive models that also can be easily interpreted because the rules that are satisfied give a reason for each prediction. 
-Given a set of rules associated with a dataset, rule lists can be constructed by placing the rules in different orders.
+This structure allows for predictive models that can be easily interpreted because each prediction is explained by the rule that is satisfied. 
+Given a set of rules associated with a dataset, different rule lists can be constructed by placing the rules in different orders.
 Since most data points are captured by multiple rules, changing the order of rules leads to different predictions and therefore different accuracies. 
-Different rule list algorithms all attempt to maximize predictive accuracy through the discovery of different rules lists.
+Rule list generation algorithms attempt to maximize predictive accuracy through the discovery of different rule lists.
 
-Pitting interpretable models against black box ones raises the question of how accurate the interpretable models can be.
-Thus, searching for an optimal model to provide an upper bound on the potential accuracy of an interpretable model is crucial when discussing whether or not to use interpretable models.
-In our case, we are searching for the  rule list with the highest accuracy, the optimal rule list. 
+Generally, interpretable models are viewed as less accurate than black box models.
+Thus, proving the optimality of an interpretable model provides an important upper bound on the accuracy of that model.
+This helps decision makers decide whether or not to use interpretable models.
+In our case, we are searching for the rule list with the highest accuracy----the optimal rule list. 
 A brute force solution to find the the optimal rule list would be computationally prohibitive due to the combinatorially number of rule lists.
-Our goal is to create an algorithm to find the optimal rule list in a reasonable amount of time.
+Our algorithm uses combinatorial optimization to find the optimal rule list in a reasonable amount of time.
 
-Recent work on generating rule lists \cite{LethamRuMcMa15,YangRuSe16} uses
-probabilistic approaches to generating rule lists.
-These approaches achieve high accuracy while also managing to run quickly. 
+Recent work on generating rule lists \cite{LethamRuMcMa15,YangRuSe16} uses probabilistic approaches to generating rule lists.
+These approaches achieve high accuracy while also managing to run quickly.
 However, despite the apparent accuracy of the rule lists generated by these algorithms, there is no way to determine if the generated rule list is optimal or how close to optimal the rule lists is. 
 Our model, called Certifiably Optimal RulE ListS (CORELS), finds the optimal rule list and allows us to also investigate the accuracy of near optimal solutions. 
 The benefits of this model are two-fold: firstly, we are able to generate the best rule list on a given data set and therefore will have the most accurate predictions that a rule list can give.
@@ -74,13 +80,13 @@ Our use of this branch and bound technique leads to massive pruning of the searc
 Due to our interest in interpretability, the amount of data each rule captures informs the value of that rule. 
 We want our rule lists to be understandable by humans, so shorter rule lists are more optimal. 
 Therefore, we use an objective function that takes into account both accuracy and the length of the rule list to prevent overfitting. 
-This means we may not always find the highest accuracy rule list--our optimality is over both accuracy and length of rule lists.
+This means we may not always find the highest accuracy rule list---our optimality is over both accuracy and length of rule lists.
 This requires each rule to capture a certain amount of data correctly to make it worth the penalty of making our rule list longer. 
 This limits the overall length of our rule lists and prevents us from investigating rule lists containing useless rules.
 
-The exponential nature of the problem means that the efficacy of CORELS is dependent on how much our bounds allow us to prune. 
+The exponential nature of the problem means that the efficacy of CORELS is partially dependent on how much our bounds allow us to prune. 
 We list a few types of bounds that allow us to drastically prune our search space. 
-The first type of bound is intrinsic to the rules themselves. 
+The first type of bound is intrinsic to the rules themselves.
 This category includes bounds such the bound described above that ensures rules capture enough data correctly to overcome a regularization parameter. 
 Our second type of bound compares the best future performance of a given rule list to the best solution encountered so far. 
 We can avoid examining parts of the search space whose maximum possible accuracy is less than the accuracy of our current best solution. 
@@ -92,28 +98,23 @@ This tree structure facilities the use of multiple different selection algorithm
 In addition, we are able to limit the number of nodes in the tree and thereby achieve a way of tuning space-time tradeoffs in a robust manner. 
 We propose that this tree structure is a useful way of organizing the generation of rule lists and allows the implementation of CORELS to be easily parallelized.
 
-We evaluated CORELS on a number of datasets from the UCI repository. 
-Our metric of success was prediction accuracy on a subset of the data which we calculated using 10-fold cross validation. 
-These datasets involve hundreds of rules and hundreds or thousands of samples and CORELS is able to find the optimal rule list within 10 minutes. 
-We show that we are able to achieve better accuracy on these datasets than the popular greedy algorithms, CART or C4.5.
-
-In addition, we applied CORELS to the problem of predicting criminal recidivism. 
-Larson et al examines the problem of predicting recidivism and shows that a black box model, specifically the COMPAS score from the company Northpointe, has racially biased prediction \cite{LarsonMaKiAn16}.
-Black defendants are misclassified at a higher risk for recidivism than in actuality, while white defendants are misclassified at a lower risk. 
+We applied CORELS to the problem of predicting criminal recidivism on the COMPAS dataset.
+Larson et al examines the problem of predicting recidivism and shows that a black box model, specifically the COMPAS score from the company Northpointe, leads to racially biased predictions \cite{LarsonMaKiAn16}.
+Black defendants are misclassified at a higher risk for recidivism than occurs in practice, while white defendants are misclassified at a lower risk. 
 The model which produces the COMPAS scores is a black box algorithm which is not interpretable, and therefore the model does not provide a way for human input to correct for these racial biases. 
-Our model produces similar accuracies to the predictive models and COMPAS scores from Larson et al while maintaining its interpretability.
+Our model produces accuracies that are similar to standard predictive models and the black-box COMPAS scores while maintaining its interpretability.
 
-CORELS demonstrates a novel approach towards generating interpretable models by looking for the optimal rule list. 
+CORELS demonstrates a novel approach towards generating interpretable models by identifying and certifying the optimal rule list. 
 While searching for that optimal list, we are able to discover near-optimal solutions that provide insight into how effective other interpretable methods might be. 
-We have proved numerous bounds that allow us to prune rule lists.
-Finally, we created a novel symmetry-aware map that drastically reduces the search space of possible rule lists.
+Rule lists have been around for 30 years \cite{Rivest87}, but computational power has been too limited to attack problems of reasonable scale.
+IT is our hope that our tree structure and symmetry-aware map, as well as their associated optimizations, can be applied more broadly to other discrete optimization problems.
 
-Chapter 2 provides an overview of related work in the fields of rule lists, interpretable models, and discrete optimization. 
-Chapter 3 proves bounds that underlie the execution of the algorithm.
-Chapter 4 describes the implementation of the algorithm, emphasizing the data structures used to make this problem tractable.
-Chapter 5 describes experiments run to test the space/time tradeoffs detailed in chapter 4.
+Chapter 1 provides an overview of related work in the fields of discrete optimization, interpretable models, and rule lists. 
+Chapter 2 proves definitions and explanations of the terminology used in the rest of this thesis.
+Chapter 3 describes the implementation and architecture of CORELS, paying special attention to the data structures used to make this problem tractable.
+Chapter 4 explains the data structure optimizations performed and the experiments used to validate these optimizations.
 
-\section{Related Work}
+\chapter{Related Work}
 
 The use of classification models is popular in a number of different fields from image recognition to churn prediction.
 Oftentimes, however, simply receiving a prediction from software is not enough--it is important to have a predictive model that humans can investigate and understand \cite{Ruping06, Bratko97, Quinlan99, Martens11, Freitas14}.
@@ -166,30 +167,31 @@ Then, by calculating a value corresponding to the end goal of the algorithm (e.g
 This technique has been used to solve NP-hard problems such as the Traveling Salesman Problem \cite{LittleMuSwKa63}, the Knapsack Problem \cite{Kolesar67}, or the Mixed Integer Programming problems \cite{Clausen99}.
 Branch and Bound is also used as an optimization technique for some machine learning algorithms, though it has not been applied to decision lists before now \cite{ChapelleSiKe06}.
 
-\section{Definitions}
-Here we present some of definitions of concepts and terms that are used throughout this work.
+\chapter{Definitions}\label{ch:definitions}
+\newthought{We present definitions and explanations} of concepts and terms that are used throughout this work.
 
-\subsection{Rules}
-Rules are IF-THEN statements consisting of a boolean antecedent and a classification label.
+\section{Rules}
+A \textit{rule} is an IF-THEN statement consisting of a boolean antecedent and a classification label.
 We are working in the realm of binary classification, so the label is either a 0 or a 1.
-The boolean antecedents are generated from the rule mining mechanism and can be a conjunction of boolean clauses.
-These antecedents are satisfied by some data points and not for others.
+The boolean antecedents are generated from the rule mining mechanism and are a conjunction of boolean features.
+These antecedents are satisfied by some data points (also called \textit{samples}) and not for others.
 We say a rule \textit{classifies} a given data point when the antecedent is satisfied for that data point.
 As we combine these rules into rule lists, only the first rule that classifies any given data point can make a prediction for that data point.
 Thus, we say a rule \textit{captures} a given data point if it is the first rule in a rule list to classify that data point.
 
-\subsection{Rule Lists}
+\section{Rule Lists}
 %Let us define a training dataset of size N as $\{x_n, y_n\}_{n=1}^N$ where each $x_n \in \{0, 1\}^J$ are binary features and each $y_n \in \{0, 1\}$ are binary labels.
 %Each rule $x_n$ therefore classifies some of the data points (those indices where $x_{n, j} = 1$).
 %Define a rulelist $\mathbf{r} = (r_1, r_2, ... , r_k, r_0)$ where each $r_i \in \{x_n\}_{n=1}^N, \forall i > 0$.
 %$r_0$ is defined as the default rule, which makes a prediction on all data points that are not captured in rules $1 ... k$. 
-A rule list is an ordered collection of rules.
-As defined above, rules have inherent accuracies based on what data they classify and how they predict the label, but that they are judged based on what data they capture.
-However, they can perform better or worse than their inherent accuracy depending on what rules come before them in a given rule list.
-Thus, any model building technique is focused on finding a rule list that maximizes predictive accuracy.
-A rule list also has a \textit{default rule}, placed at the end of all of the pre-mined rules, that classifies all data points and predicts the majority label.
+A \textit{rule list} is an ordered collection of rules.
+As defined above, rules have an inherent accuracy based on what data they classify and how they predict the label.
+When they are placed into a rule list, however, their accuracy is based on what data they capture---which is usually not the same as what data they classify.
+They can perform better or worse than their inherent accuracy depending on what rules come before them in a given rule list.
+Thus, our algorithm is focused on finding the list composed of the best rules and the order that maximizes predictive accuracy.
+A rule list also has a \textit{default rule}, placed at the end of all of these rules, that classifies all data points and predicts the majority label.
+This allows a rule list to make predictions for all points because any point not captured by the pre-mined rules is therefore captured by the default rule.
 We refer to the set of rules that compose a rule list, not including the default rule, as a \textit{prefix}.
-A rule list makes prediction for all points because any point not captured by the prefix is therefore captured by the default rule.
 
 \begin{figure}[t!]
 %\vspace{-3mm}
@@ -202,143 +204,179 @@ A rule list makes prediction for all points because any point not captured by th
 \State \belse $no$
 \end{algorithmic}
 %\vspace{-3mm}
-\caption{An example rule list that predicts two-year recidivism for the ProPublica dataset, found by CORELS.}
+\caption{An example rule list that predicts two-year recidivism for the COMPAS dataset, found by CORELS.}
 \label{fig:rule-list}
 \end{figure}
 
-\subsection{Objective}
+\section{Objective Function}
 Rule lists have a loss function based on the number of points that are misclassified by the rules in the rule list.
-We define our objective function to be the sum of that loss and a regularization term.
-We use a regularization term, which is a constant times the length of the rule list, to prevent our rule lists from growing too long and therefore losing their interpretability.
-This objective function is what we are going to optimize over, and it is inversely correlated to the accuracy of the rule list. 
+We define our \textit{objective} function to be the sum of that loss and a regularization term.
+We use a \textit{regularization} term, which is a constant times the length of the rule list.
+This has the effect of preventing overfitting on training data sets as well as preventing extremely long, and therefore uninterpretable, rule lists.
+While the objective is related to accuracy (a higher accuracy means a lower objective), we will be optimizing over the objective function instead of just the accuracy in order to get the benefits of the regularization term.
 
-\subsection{Bounds}
-We use the discrete-optimization technique of branch-and-bound to solve this combinatorially difficult problem.
+\begin{math}
+objective(RL) = loss(RL) + c * len(RL)
+\end{math}
+
+\section{Bounds}\label{sec:bounds}
+For a set of $n$ rules, there are $n!$ possible rule lists.
+Finding the optimal rule list using a brutal force is infeasible for any problem of reasonable size.
+Our algorithm uses the discrete optimization technique of branch-and-bound to solve the combinatorially difficult problem of finding an optimal rule list.
 This requires tight bounds that allow us to prune as much of the search space as possible.
-These bounds are formalized and proved in Angelino et al. \cite{AngelinoLaAlSeRu17} and are listed in Appendix A.
-For clarity's sake we present summaries of the important bounds here.
+These bounds are formalized and proved in Angelino et al. \cite{AngelinoLaAlSeRu17} and are reproduced in Appendix A.
+For clarity we present informal summaries of the important bounds here.
 
-\subsubsection{Lower Bound}
+\subsection{Lower Bound}
 We use the term \textit{lower bound} to mean the best possible outcome for the objective function for a given prefix.
 We do this by calculating the error of the prefix and assuming that any points uncaptured by the prefix will be predicted correctly.
-Because any future extensions of the prefix can never do better than this lower bound, we will be able to use it to prune our exploration.
+This is equivalent to assuming that the default rule captures all points perfectly.
+Because any future extensions of the prefix can only ever make mistakes, we will be able to use it to prune our exploration.
+An important property of the lower bound is that it increases monotonically.
 
-\subsubsection{Objective Bound}
-The first, and most important bound, is the objective bound.
-This is the main bound for the branch-and-bound that says that we do not need to purse a rule list if it has a lower bound on its objective that is worse than the best objective we have already seen.
+\subsection{Hierarchical Objective Bound}
+The main bound for our algorithm is the \textit{hierarchical objective bound}. 
+It says that we do not need to purse a rule list if it has a lower bound that is worse than the best objective we have already seen.
+This follows from the fact that lower bounds increase monotonically, so if the lower bound of rule list A is worse than the objective of rule list B, any extensions of rule list A can never be better than rule list B.
 This allows us to prune large parts of the search space by not pursuing rule lists that could never be better than something we've already seen.
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-tree.png}
 \includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-tree-pruned.png}
-\caption[Objective bound]{This tree shows the objective bound in action. Our best objective seen is the rule list (blue, gray) with an objective of $0.10$. Any rule lists with lower bound greater than this objective--(gray), (red, green), (green, gray) can be pruned and
+\caption[Objective bound]{This tree shows the hierarchical objective bound in action. Our best objective seen is the prefix (blue, gray) with an objective of $0.10$. Any prefixes with lower bound greater than this objective--(gray), (red, green), (green, gray) can be pruned and not ever looked at.
 \label{fig:objective-bound}}
 \end{figure}
 
-\subsubsection{Permutation Bound}
+\subsection{Permutation Bound}
 
 As defined above, every sample is captured by precisely one rule--any sample that is caught by rule A in the rule list AB cannot be caught by rule B. 
-Now consider a permutation of the rule list AB: the rule list BA.
+Now consider a \textit{permutation} of the rule list AB: the rule list BA.
 Any samples that are captured by either rule A or B but not both will be captured identically in both rule lists.
 Samples that are captured by both rules will again be captured the same in both rule lists, though they may be predicted differently in the two rule lists.
-Thus, regardless of the order in which the rules appear, rule lists AB and BA will capture exactly the same set data.
-They will differ only in which rules capture which samples and therefore their accuracy may differ. 
+Thus, regardless of the order in which the rules appear, rule lists AB and BA will capture exactly the same set of data.
+They will differ only in which rules capture which samples, so their accuracy may differ. 
 We can use this knowledge to create a bound as follows.
 If we know that the lower bound of AB is better than the lower bound of BA, we can eliminate from consideration all rule lists beginning with BA.
-This is due to the fact that any corresponding rule list beginning with AB will capture exactly the same samples as the equivalent rule list beginning with BA but will have a better objective function.
+This is due to the fact that any corresponding rule list beginning with AB will capture exactly the same samples as the equivalent rule list beginning with BA but will have a better objective score.
 We can eliminate all but one permutation of a given set of rules using this principle.
 
-\subsubsection{Support Bound}
-Due to our regularization term in calculating our objective function, adding a rule that does little to help our accuracy will actually be harmful to the overall objective score.
-This allows us to place a bound intrinsic to the rule we're proposing adding.
-We only consider adding rules that have capture enough data points correctly to overcome the regularization term.
-Even though all rules have at least that support in the first case, as our rule lists get longer many rules do not capture enough points that haven't already been captured.
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-permutations.png}
+\includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-permutations-pruned.png}
+\caption[Permutation bound]{This tree shows the use of the permutation bound. Prefixes (blue, green) and (green, blue) are permutations of each other, so their lower bounds can be compared. The prefix (green, blue) has a better lower bound, so (blue, green) can be pruned and none of its children have to be examined.
+\label{fig:permutation-bound}}
+\end{figure}
 
-\subsubsection{Equivalent Points Bound}
+\subsection{Support Bounds}
+Due to our regularization term in calculating our objective function, adding a rule that does little to help our accuracy will actually be harmful to the overall objective score.
+This allows us to place bounds that rely on the \textit{support} of the rules we add.
+It never makes sense to add a rule that increases the objective function, so we only consider adding rules that capture enough points correctly to overcome the regularization penalty.
+By definition, rules that don't capture enough of the remaining points cannot capture them correctly, so this provides us with two closely related bounds.
+As our rule lists get longer many rules do not capture enough points that haven't already been captured and this bound begins to play an even larger role.
+
+\subsection{Equivalent Points Bound}
 This bound relies on the structure of our dataset.
 In our dataset, we may encounter two data points that have the same features but different labels.
-Thus, any rule that classifies one of the data points will also classify the other data point, but it is impossible to correctly predict both data points.
-For a given class of equivalence points, therefore, we know that we will mispredict all of the points with a minority label.
-We can thus update our lower bound to, by assuming that all uncaptured data will be correctly predicted only if it is not an equivalent point with a minority label.
+We call the set of these data points \textit{equivalence points}, and describe the label that occurs less often as the \textit{minority} label.
+Any rule that classifies one point in an equivalence class will also classify all other points in that class.
+However, it is impossible to correctly predict equivalence points with different labels using a single rule.
+So, for a given class of equivalence points, we know that we will mispredict all of the points with a minority label.
+We can thus update our lower bound to be tighter than just assuming that the default rule will capture all remaining points correctly.
+Now, we assume all remaining points will be captured incorrectly if it is an equivalent point with a minority label.
 This gives us much tighter lower bounds and in practice allows us to prune much more efficiently.
 
-\subsection{Curiosity}
-We have a number of different ways to explore the search space (see \ref{queue}).
-Some of them, such as BFS prioritize exploration over exploitation.
-Others, such as ordering by lower bound ensure that we are purely exploiting the best prefixes that we've seen.
-We define a new metric, \textit{curiosity}, that is a function of both the lower bound and the number of samples captured.
-This allows it to blend together both exploration and exploitation.
+\section{Curiosity}
+There are a number of different ways to explore the search space (see \ref{sec:queue}).
+Some methods, such as BFS, prioritize exploration---looking at all rule lists of a given length before proceeding to the next length.
+Others, such as a priority queue ordered by lower bound, focus on purely exploiting the best prefixes that we've seen.
+We define a new metric, \textit{curiosity}, that blends together both exploration and exploitation.
+Curiosity is a function of both the lower bound and the number of samples captured.
+This prioritizes rule lists that still have many samples left to capture (exploration) while also pursuing rule lists with promising lower bounds (exploitation).
 
-\subsection{Remaining Search Space}
-Throughout this work, we will want to track how effective our bounds and other optimizations are.
-One metric for tracking that will be seeing how quickly we reduce the remaining search space.
-We start with a combinatorially large search space, but quickly prune it down.
-The way we calculate the currently remaining search space is by looking at all of the leaves of the queue and seeing how much each leaf could potentially be expanded.
+\begin{math}
+curiosity(RL) = lowerBound(RL) - c * (len(RL) - 1)  * (nsamples / |captured(RL)|)
+\end{math}
+
+\section{Remaining Search Space}
+One metric for tracking the efficacy of our optimizations will be seeing how quickly we reduce the remaining search space.
+We start with a combinatorially large search space, but quickly prune it down using our bounds.
+We calculate the remaining search space is by looking at all of the potential prefixes in our  queue and seeing how much each prefix could potentially be expanded.
 Due to our regularization term, we are able to bound the maximum length of a prefix as our best objective gets updated.
-
-\section{Implementation}
+This upper bound on the maximum length of a viable prefix allows us to place an upper bound on the search space as well.
+We find that the remaining search space decreases rapidly at the beginning of execution, then slowly decreases until the very end of execution when it again rapidly decreases.
 
 This chapter lays out the design and implementation of the system used to generate optimal rule lists. 
 We begin by describing each of the three main data structures used to run our algorithm--a prefix trie, a symmetry-aware map, and a queue. 
-Then, we describe the overall execution of the key algorithm and provide a pseudocode version.
+Then, we 
 
-\subsection{Prefix Trie}
-The prefix trie is a custom C++ class which is used as a cache to keep track of rule lists we have already evaluated. 
+\section{Prefix Trie}
+The prefix trie is a custom C++ class and is used as a cache to keep track of rule lists we have already evaluated. 
 Each node in the trie contains the metadata associated with that corresponding rule list. 
 This metadata includes bookkeeping information such as what child rule lists are feasible as well as information such as the lower bound and prediction for that rule list.
-In addition to our BaseNode class, there are two different node types that we use in our algorithm.
-Firstly, we implement a CuriousNode class that has an additional field that tracks the curiosity of a given prefix.
-The curiosity metric is the one described in Chapter \ref{bounds}.
-The curiosity is used to determine the order that prefixes on the queue are explored.
-Secondly, we implement a CapturedNode class that extends on the CuriousNode by having an additional field keeping track of the captured vector for that prefix.
-This allows us to speed up our incremental computations at the expense of using more memory per node (otherwise we have to recompute this vector every time we have a computation).
+In addition to our base trie class, we implemented two different node types that we use in our algorithm.
+First, we implemented a class that has an additional field that tracks the curiosity of a given prefix as defined in \ref{ch:definitions}.
+Curiosity is used by our queue to determine the order that prefixes are explored.
+Since the curiosity field is just a double, the memory overhead is minimal and the speed-up of using curiosity as opposed to BFS is sizable (see \ref{exp:priority}).
+We also implemented a class that has an additional field keeping track of the captured vector for that prefix.
+This captured vector has length $nsamples$, which means it is memory expensive.
+However, using the captured vector allows us to speed up our incremental computations because we would otherwise have to recompute this vector every time we used that prefix.
 
-\subsection{Queue}
-The various node types determine what type of search policy we use to explore the search space.
-We use a STL C++ priority queue to hold all of the leaves of the trie that still need to be explored.
-We implement a number of different scheduling schemes including BFS, DFS, and a priority queue.
-The priority queue can be ordered by curiosity, the objective of a prefix, or the lower bound of a prefix.
-We also have a stochastic exploration process that bypasses the use of a queue by walking down the trie, randomly choosing a child each time, until a leaf is chosen to be explored.
-We find that ordering by curiosity will often, but not always, lead to a faster runtime than using BFS.
+\section{Queue}\label{sec:queue}
+Our queue support many different types of search policies that we can use to explore the search space.
+We implement a number of different scheduling schemes including BFS, DFS, various priority metrics, and a stochastic exploration process.
+Due to our use of incremental computation, our queue contains pointers to leaves in the trie.
+The search process involves selecting which leaf node to explore.
+The stochastic exploration process bypasses the use of a queue by performing random walks on the trie until a leaf is reached.
+Our other scheduling schemes use a STL C++ priority queue to hold and order all of the leaves of the trie that still need to be explored.
+Our priority metrics can be ordered by curiosity, the objective of a prefix, or the lower bound of a prefix.
+We find that using an exploitation strategy such as ordering by curiosity or lower bound will usually lead to a faster runtime than using BFS.
 
-Since we do not have access to the container underlying the queue, we cannot randomly access elements in the queue, even if we have a pointer to the leaf node in the prefix trie.
-Thus, we run into a problem where we may delete something in the prefix trie that is currently in the queue, but have no way to update the queue.
-We deal with this by lazily deleting nodes from the prefix trie.
-This means we mark the node as deleted in the trie, but don't actually delete the physical node until it has been popped off of the queue.
+In C++ the priority queue is a wrapper container that prevents access to the container underlying the queue.
+Therefore we cannot access elements in the middle of the queue, even if we have know the value that we're trying to access..
+Thus, we run into a problem where we may delete something in the prefix trie that is currently in the queue but have no way to update the queue.
+We deal with this by lazily marking nodes as deleted in the prefix trie without deleting the physical node until it has been popped off of the queue.
 As Fig \ref{fig:queue_gc} shows, this leads to a situation where our logical queue is actually smaller than the physical queue.
 
 \begin{figure}[t!]
 \begin{center}
-\includegraphics[width=0.65\textwidth]{figs/ela_compas-queue-cache-size-insertions.png}
+\includegraphics[width=0.65\textwidth]{figs/compas-queue-cache-size-insertions.png}
 \end{center}
-\caption{Difference between logical cache and physical cache}
+\caption{Size of prefix trie, logical queue, and physical queue over the execution of our algorithm. Note that the gap between the logical queue and the physical queue is due to our lazy garbage collection}
 \label{fig:queue_gc}
 \end{figure}
 
-\subsection{Symmetry-aware map}
-We implement the symmetry-aware map as an STL unordered\_map. 
+\section{Symmetry-aware map}
+We implement our symmetry-aware map as an STL unordered\_map.
 We use this data structure to implement the permutation bound described in \ref{def:perm-bound}.
-We have two different versions of the map with different keys that both allow permutations to be compared and pruned.
-In both cases, the values contain the actual ordering of the rules that represents the current best prefix for that permutation.
-In the first version, keys to the map are represented as the canonical order of rule lists: i.e. the lists 3-2-1 and 2-3-1 both map to 1-2-3.
-The second version has keys that represent the captured data points.
+We have two different versions of the map with different key types that allow permutations to be compared and pruned.
+In both cases, the values consist of the best lower bound and the actual ordering of the rules that is best for that permutation.
+In the first version, keys to the map are represented as the canonical order of the rules: i.e. the lists 3-2-1 and 2-3-1 both map to 1-2-3.
+The second version has keys that represent the captured vector.
 Our earlier permutation bound was based off of the fact that different permutations capture the same data, so this type of key will again be equivalent for the rule lists 3-2-1 and 2-3-1.
-Representing keys with captured vectors could potentially match more permutations, but requires more memory.
-Since most data sets have a large amount of data, the keys representing the canonical ordering are usually more efficient.
-In general, for long runs of our algorithm, the permutation map dominates our memory usage.
+Representing keys with captured vectors could potentially match more permutations since two prefixes may not be permutations of each other but might capture the same data points and therefore fall under the permutation bound.
+In fact, we find that this occurs only rarely, as the number of rule lists examined is only slightly less in the captured vector case.
+Despite only supporting one bound, the permutation map plays a significant role in our memory usage.
 
-\subsection{Incremental execution}
-Our program executes as follows. 
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{figs/prefix-captured_pmap_mem.png}
+\includegraphics[width=0.4\textwidth]{figs/prefix-captured_tree_size.png}
+\end{center}
+\caption{This graph shows the memory usage of the map when using CapturedKeys and PrefixKeys. We see that CapturedKeys provide minimal space savings over PrefixKeys due to the slight decrease in nodes inserted into the trie.}
+\label{fig:prefix-captured}
+\end{figure}
+
+
+\section{Incremental execution}
+We detail the execution of our program below.
+Our program ends when all leaves of the trie have been explored and there is nothing else in our queue.
+We can also choose to not receive the full certificate of optimality by exiting execution when a certain number of rule lists are in the trie.
 While there are still leaves of the trie to be explored, we use our scheduling policy to select the next rule list to evaluate.
-Then, for every rule that is not already in this rule list, we calculate its lower bound, objective, and other metrics that would occur if the rule were added to the end of the rule list.
-If the lower bound is greater than the minimum objective, meaning this new rule list could never be better than one we have already seen, we don't insert the new rule list into the tree or queue.
-We next check if there is a better permutation of this rule list in the permutation map and discard the new rule list if it is not better than the rule list we already have in the permutation map.
-If our new rule list is better, then we insert it into the permutation map, the tree, and the queue and update the minimum objective if necessary.
-
-Every time we update the minimum objective, we garbage collect on the trie.
-We do this by traversing from the root the all of the leaves, deleting any subtrees of nodes with a lower bound that is larger than the minimum objective.
-In addition, if we encounter a node with no children, we prune upwards--deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
-This garbage collection allows us to limit the memory usage of the trie, though garbage collection is not triggered too often.
+Then, for every rule that is not already in this parent rule list, we calculate the lower bound, objective, and other metrics for the potential child rule list consisting of the new rule appended to the parent rule list.
+We check the support bounds, the hierarchal objective bound, the permutation bound, and the lookahead bound.
+If the child rule list has a lower bound that is better than all of these bounds, then we insert it into the permutation map, the tree, and the queue and update the minimum objective if necessary.
+Otherwise, we do not insert it into any of our data structures and we continue to the next potential rule to add, having excluded a rule list from being optimal.
+After evaluating all the rules we could add to our parent rule list, we return to the main loop and look at the next leaf of the trie.
 
 \begin{algorithm}[t!]
   \caption{Branch-and-bound for learning rule lists}
@@ -360,7 +398,6 @@ This garbage collection allows us to limit the memory usage of the trie, though 
 	\EndIf
 \EndWhile
 \State \Return $opt, T$.minObjective(\,)
-
 \end{algorithmic}
 \end{algorithm}
 
@@ -373,40 +410,157 @@ This garbage collection allows us to limit the memory usage of the trie, though 
 prefix tree~$T$,
 queue~$Q$,
 symmetry-aware map~$P$
-\State \textbf{Output:} None--updates best objective in the tree\\
+\State \textbf{Output:} None---destructively updates best objective in the tree\\
 \State $prefix \gets parent$.prefix(\,)
-\State $t \gets \lambda *$ nsamples \Comment{This forms the threshold for our support bounds}
+\State $t \gets c *$ nsamples \Comment{This forms the threshold for our support bounds}
 \For {$rule \notin prefix$}
 	\State $rlist \gets prefix$.append($rule$)
-	\State $cap \gets parent$.notCaptured(\,) $\wedge rule$.notCaptured(\,)
+	\State $cap \gets parent\text{.notCaptured(\,)} \wedge rule$.notCaptured(\,)
 	\If {$|cap| < t$} \Comment{Minimum support bound}
 		\State continue
 	\EndIf
 	\State $capZero \gets cap \wedge T$.zeroLabel(\,) \Comment{Record how many zeros the new rule captures}
-	\State $cap\_correct \gets max\{|captured\_zeros|, |captured| - |captured\_zeros|\}$
-	\If {$|captured\_correct| < threshold$} \Comment{Minimum correct support bound}
+	\State $corr \gets max\{|capZero|, |cap| - |capZero|\}$
+	\If {$corr < threshold$} \Comment{Minimum correct support bound}
 		\State continue
 	\EndIf
-	\State $lower\_bound = parent->lower\_bound - parent->minority + |captured| - |captured_correct| / nsamples + c$
-	\If {$lower_bound  >= T->min\_objective()$} \Comment{Objective bound}
+	\State $lb = parent.\text{bound(\,)} - parent.\text{minority(\,)} + \frac{|cap| - corr}{nsamples} + c$ \Comment{Calculate lower bound}
+	\If {$lb  >= T.$minObjective(\,)} \Comment{Objective bound}
 		\State continue
 	\EndIf
-	\If {$objective < T->min\_objective()$} \Comment{Update minimum objective}
+	\State $notCap \gets parent\text{.notCaptured(\,)} \wedge \neg cap$
+	\State $notCapZero \gets notCap \wedge T$.zeroLabel(\,)
+	\State $defaultCorr \gets max\{|notCapZero|, |notCap - notCapZero|\}$
+	\State $obj \gets lb + \frac{|notCap| - defaultCorr}{nsamples}$ \Comment{Calculate objective}
+	\If {$obj < T$.minObjective(\,)} \Comment{Update minimum objective}
+		\State $T.minObjective(obj)$
+	\EndIf
+	\If{$lb + c >= T.$minObjective(\,)} \Comment{Lookahead bound---don't add to queue if its children will all be worse than the minimum objective}
 		\State continue
 	\EndIf
-	\If{$lower\_bound + c >= T->min\_objective()$} \Comment{Lookahead bound}
-		\State continue
-	\EndIf
-	\State $n \gets P->insert(rlist)$ \Comment{Symmetry-aware map handles permutation bound for us}
-	\If {$n$}
-		\State $T->insert(n)$
-		\State $Q->push(n)$
+	\State $n \gets P.insert(rlist)$ \Comment{Symmetry-aware map handles permutation bound for us}
+	\If {$n$} \Comment{$n$ will be NULL if it failed the permutation bound check}
+		\State $T.$insert($n$)
+		\State $Q.$push($n$)
 	\EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
 
+\section{Garbage Collection}
+Every time we update the minimum objective, we garbage collect on the trie.
+We do this by traversing from the root to all of the leaves.
+Any time we encounter a node with a lower bound larger than the minimum objective, we delete its entire subtree.
+In addition, if we encounter a node with no children, we prune upwards---deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
+This garbage collection allows us to limit the memory usage of the trie.
+In practice, though, the minimum objective is not update that often, so garbage collection is triggered only rarely.
 
+\section{Templates vs Inheritance}
+Our system has a lot of different modular parts--various priority metrics, symmetry-aware map types, and different types of information stored in trie nodes.
+Since we were using C++, we took advantage of its templating system to achieve this modularity.
+We believed that it would be the easiest way to switch out different components of the system, but did not think about the ramifications of this choice.
+Due to code duplication, large amount of templates can lead to a much larger execution.
+Indeed, with a pure templating system, our executable was 253732 bytes.
+
+Our other alternative way to maintain modularity was to take advantage of C++'s class system and use inheritance and polymorphism.
+Now, instead of having a template argument for each data structure, we can have a base data structure type and then implement each of our extensions as subclasses.
+Therefore, we can write all of our functions to take the base class as arguments and then pass in the specialized subclasses based on command line arguments.
+This requires the use of virtual functions, which are potentially a bit slower than regular functions because they require a vtable lookup.
+With a pure inheritance framework, our executable was 171288 bytes.
+However, even with the inheritance framework, the runtime of our algorithm was not significantly different from the template runtime.
+Thus, since inheritance provided a much cleaner code base to work with, we decided to switch to an inheritance based framework.
+
+\section{Memory tracking}
+We track memory through the use of C++11 custom allocators.
+Our allocators are simple malloc wrappers that also log which data structure the allocation is coming from--the trie, the map, or the queue.
+We validated the accuracy of this memory tracking by running the program under Valgrind's massif heap profiler tool and comparing the outputs.
+Our outputs matched Valgrind's to within a few hundred bytes, so we concluded that our memory tracking was successful.
+The heap profiling of Valgrind has a large overhead, while our memory logging is more limited and therefore overhead is very minimal.
+This allows us to write out our memory usage per data structure on a regular basis without incurring the large overhead of Valgrind.
+
+\chapter{Experiments}
+
+\section{Symmetry-aware Map Optimization}
+As one of our two main data structures, the memory usage of our symmetry-aware map is something that was very important to us.
+We found that we often had trouble running large data sets because we would run out of memory before certifying the optimal rule list.
+In these long runs, our permutation map would grow to be hundreds of thousands or millions of entries large.
+Thus, carrying a lot of memory overhead with each node led to serious memory bloat and ran us out of memory.
+This section explores some of the techniques we used to handle this memory bloat.
+
+Our symmetry-aware map was originally an STL map with keys as STL sets of size\_t and values as pairs of STL vectors of size\_t and a double.
+The first problem is that the STL map is implemented as a red-black tree, meaning every node had the overhead of multiple pointers pointing to its children.
+This can be solved using a STL unordered map, which is implemented as a hashtable.
+That has some overhead, since it will allocate more buckets than are filled, but nowhere near to the two pointers per node of overhead of the STL map.
+
+Next, the representation of the rule ids no longer had to be size\_t.
+We made an assumption that we'll never have more than 65000 rules, so we used unsigned shorts for our rule ids.
+This means that our final data structure was able to use only 2 bytes per rule id instead of 8 bytes for a size\_t.
+Since we're keeping two different representations of the prefix--the canonical order and the actual order of the prefix, and these prefixes can be of length on the order of 5 rules, saving 6 bytes per rule translates to a lot of 
+
+Our initial implementation used an STL set as the key, which carries a lot of overhead because of all the operations that a set needs to support.
+For a prefix of length 6, the corresponding key therefore takes up 
+After starting with the STL set, we transition to a sorted STL vector.
+This reduced overhead because a vector is essentially just an array with a little bit of overhead.
+However, all of these STL containers support a broader range of operations than we needed.
+All we needed was some way to compare the canonical orders and determine if they were the same.
+We eventually achieved this simply by allocating a chunk of memory that held the length of the prefix and the sorted order of the ids.
+This means that, for a prefix of length 6, we use 14 bytes for the key.
+
+We had a similar set of issues with our values for the permutation map.
+Beginning with a STL vector to keep track of the actual order of the rules in the prefix, we again wanted to remove the overhead incurred by the fact that STL containers need to support a wider array of operations than we needed.
+Thus, we could use a similar technique to what we did with the keys to keep track of the prefix order.
+However, in fact, we can do even better because we already have a canonical representation of the rules--all we need in the value was the ordering of those rules.
+Thus, we can use unsigned chars instead of unsigned shorts to record the index of where the rules in the canonical order are in the prefix.
+
+However, these optimizations all pertained to the symmetry-aware map with prefix keys.
+Dealing with the captured vector keys required a different approach.
+Our captured vectors were of type mpz, and since unordered\_map requires a custom hash for unsupported types, we had to find a way around that.
+STL has some hash functions for built in types, so we initially wrote a function to convert between our VECTOR type and a $std::vector<bool>$.
+This conversion turned out to be very slow, especially as we were running on data sets with many samples, meaning these mpz types were fairly memory intensive.
+Once we wrote our own hash function and were able to use our mpz type again, it became much faster.
+
+\section{Ablation--how much does each bound/optimization help?}
+
+We ran a number of experiments where we only took out one component and measured the effects on the time and memory of our algorithm.
+We find that each optimization and bound is extremely important to concluding the algorithm quickly and in a reasonable amount of memory.
+These were all executed on a MacBook Air with 8GB of RAM.
+
+\subsection{Full CORELS system}
+
+Running the full CORELS system on the COMPAS dataset yields the optimal solution and its certificate within 121s.
+
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{figs/corels_mem.png}
+\end{center}
+\caption{}
+\label{fig:prefix-captured}
+\end{figure}
+
+\subsection{Priority Queue} \label{exp:priority}
+142.s
+
+\subsecton{Support Bounds}
+261s
+
+\subsection{Symmetry-aware map}
+
+\subsection{Lookahead Bound}
+
+\subsection{Equivalent points bound}
+
+\subsection{Objective Bound}
+
+\section{Parallelization}
+The tree structure of our trie lends itself nicely to parallelization.
+
+We began by trying to parallelize the inner loop of our incremental evaluation.
+This 
+This had too much contention.
+
+Instead, we can parallelize the search over the tree itself.
+
+\begin{comment}
 \section{Methodology}
 
 \subsection{Improving Memory Usage of Symmetry-aware Map and Trie (Finding memory bottlenecks)}
@@ -765,7 +919,7 @@ With Logger as an inherited class:
 56.637848
 190.003558
 107.623293
-
+\end{comment}
 
 \subsection{Applications: COMPAS, Medical, Credit Scoring, ASC, Neural Nets}
 

@@ -19,7 +19,7 @@
 
 %\texttt{This is a line of code.}
 
-\newthought{This chapter lays out the design and implementation}, of the system used to generate optimal rule lists. 
+\newthought{This chapter lays out the design and implementation} of the system used to generate optimal rule lists. 
 We begin by describing each of the three main data structures used to run our algorithm--a prefix trie, a symmetry-aware map, and a queue. 
 Then, we 
 
@@ -53,7 +53,7 @@ As Fig \ref{fig:queue_gc} shows, this leads to a situation where our logical que
 
 \begin{figure}[t!]
 \begin{center}
-\includegraphics[width=0.65\textwidth]{figs/ela_compas-queue-cache-size-insertions.png}
+\includegraphics[width=0.65\textwidth]{figs/compas-queue-cache-size-insertions.png}
 \end{center}
 \caption{Size of prefix trie, logical queue, and physical queue over the execution of our algorithm. Note that the gap between the logical queue and the physical queue is due to our lazy garbage collection}
 \label{fig:queue_gc}
@@ -68,8 +68,18 @@ In the first version, keys to the map are represented as the canonical order of 
 The second version has keys that represent the captured vector.
 Our earlier permutation bound was based off of the fact that different permutations capture the same data, so this type of key will again be equivalent for the rule lists 3-2-1 and 2-3-1.
 Representing keys with captured vectors could potentially match more permutations since two prefixes may not be permutations of each other but might capture the same data points and therefore fall under the permutation bound.
-However, most data sets have a large amount of data, so the keys representing the captured vector are very memory intensive.
+In fact, we find that this occurs only rarely, as the number of rule lists examined is only slightly less in the captured vector case.
 Despite only supporting one bound, the permutation map plays a significant role in our memory usage.
+
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{figs/prefix-captured_pmap_mem.png}
+\includegraphics[width=0.7\textwidth]{figs/prefix-captured_tree_size.png}
+\end{center}
+\caption{This graph shows the memory usage of the map when using CapturedKeys and PrefixKeys. We see that CapturedKeys provide minimal space savings over PrefixKeys due to the slight decrease in nodes inserted into the trie.}
+\label{fig:prefix-captured}
+\end{figure}
+
 
 \section{Incremental execution}
 We detail the execution of our program below.
@@ -87,21 +97,21 @@ After evaluating all the rules we could add to our parent rule list, we return t
 \label{alg:branch-and-bound}
 \begin{algorithmic}
 \normalsize
-\State $obj \gets 0$
-\State $bestRL \gets NULL$
+\State \textbf{Output:} Outputs the best rule list and its objective\\
+\State $opt \gets NULL$
 \State $T \gets initializeTree()$
 \State $Q \gets queue(\,[T.root()\,])$
 \State $P \gets map(\{\})$
 \While {$Q$ not empty}
-	\State $node \gets Q.pop()$
-	\State $oldObj \gets T.min\_objective()$
-	\State $incremental(node, T, Q, P)$ \Comment{Evaluate all of node's children}
-	\If {$T.min\_objective() < oldObj$}
-		\State $T.garbageCollect()$
+	\State $node \gets Q$.pop(\,)
+	\State $oldObj \gets T$.minObjective(\,)
+	\State incremental($node, T, Q, P$) \Comment{Evaluate all of node's children}
+	\If {$T$.minObjective(\,) $< oldOb$j}
+		\State $opt \gets T$.bestRuleList(\,)
+		\State $T$.garbageCollect(\,)
 	\EndIf
 \EndWhile
-
-
+\State \Return $opt, T$.minObjective(\,)
 \end{algorithmic}
 \end{algorithm}
 
@@ -114,34 +124,38 @@ After evaluating all the rules we could add to our parent rule list, we return t
 prefix tree~$T$,
 queue~$Q$,
 symmetry-aware map~$P$
-\State \textbf{Output:} newObj~Best objective in the tree\\
-\State $prefix \gets parent$.prefix()
-\State $t \gets \lambda *$ nsamples \Comment{This forms the threshold for our support bounds}
+\State \textbf{Output:} None---destructively updates best objective in the tree\\
+\State $prefix \gets parent$.prefix(\,)
+\State $t \gets c *$ nsamples \Comment{This forms the threshold for our support bounds}
 \For {$rule \notin prefix$}
 	\State $rlist \gets prefix$.append($rule$)
-	\State $cap \gets parent$.not\_captured() $\wedge rule$.not\_captured()
+	\State $cap \gets parent\text{.notCaptured(\,)} \wedge rule$.notCaptured(\,)
 	\If {$|cap| < t$} \Comment{Minimum support bound}
 		\State continue
 	\EndIf
-	\State $cap\_0 \gets cap \wedge T->label_0$ \Comment{Record how many zeros the new rule captures}
-	\State $cap\_correct \gets max\{|captured\_zeros|, |captured| - |captured\_zeros|\}$
-	\If {$|captured\_correct| < threshold$} \Comment{Minimum correct support bound}
+	\State $capZero \gets cap \wedge T$.zeroLabel(\,) \Comment{Record how many zeros the new rule captures}
+	\State $corr \gets max\{|capZero|, |cap| - |capZero|\}$
+	\If {$corr < threshold$} \Comment{Minimum correct support bound}
 		\State continue
 	\EndIf
-	\State $lower\_bound = parent->lower\_bound - parent->minority + |captured| - |captured_correct| / nsamples + c$
-	\If {$lower_bound  >= T->min\_objective()$} \Comment{Objective bound}
+	\State $lb = parent.\text{bound(\,)} - parent.\text{minority(\,)} + \frac{|cap| - corr}{nsamples} + c$ \Comment{Calculate lower bound}
+	\If {$lb  >= T.$minObjective(\,)} \Comment{Objective bound}
 		\State continue
 	\EndIf
-	\If {$objective < T->min\_objective()$} \Comment{Update minimum objective}
+	\State $notCap \gets parent\text{.notCaptured(\,)} \wedge \neg cap$
+	\State $notCapZero \gets notCap \wedge T$.zeroLabel(\,)
+	\State $defaultCorr \gets max\{|notCapZero|, |notCap - notCapZero|\}$
+	\State $obj \gets lb + \frac{|notCap| - defaultCorr}{nsamples}$ \Comment{Calculate objective}
+	\If {$obj < T$.minObjective(\,)} \Comment{Update minimum objective}
+		\State $T.minObjective(obj)$
+	\EndIf
+	\If{$lb + c >= T.$minObjective(\,)} \Comment{Lookahead bound---don't add to queue if its children will all be worse than the minimum objective}
 		\State continue
 	\EndIf
-	\If{$lower\_bound + c >= T->min\_objective()$} \Comment{Lookahead bound}
-		\State continue
-	\EndIf
-	\State $n \gets P->insert(rlist)$ \Comment{Symmetry-aware map handles permutation bound for us}
-	\If {$n$}
-		\State $T->insert(n)$
-		\State $Q->push(n)$
+	\State $n \gets P.insert(rlist)$ \Comment{Symmetry-aware map handles permutation bound for us}
+	\If {$n$} \Comment{$n$ will be NULL if it failed the permutation bound check}
+		\State $T.$insert($n$)
+		\State $Q.$push($n$)
 	\EndIf
 \EndFor
 \end{algorithmic}
@@ -149,12 +163,14 @@ symmetry-aware map~$P$
 
 \section{Garbage Collection}
 Every time we update the minimum objective, we garbage collect on the trie.
-We do this by traversing from the root the all of the leaves, deleting any subtrees of nodes with a lower bound that is larger than the minimum objective.
-In addition, if we encounter a node with no children, we prune upwards--deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
-This garbage collection allows us to limit the memory usage of the trie, though garbage collection is not triggered too often.
+We do this by traversing from the root to all of the leaves.
+Any time we encounter a node with a lower bound larger than the minimum objective, we delete its entire subtree.
+In addition, if we encounter a node with no children, we prune upwards---deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
+This garbage collection allows us to limit the memory usage of the trie.
+In practice, though, the minimum objective is not update that often, so garbage collection is triggered only rarely.
 
 \section{Templates vs Inheritance}
-Our system has a lot of different modular parts--different priority metrics, symmetry-aware map types, or information stored in trie nodes.
+Our system has a lot of different modular parts--various priority metrics, symmetry-aware map types, and different types of information stored in trie nodes.
 Since we were using C++, we took advantage of its templating system to achieve this modularity.
 We believed that it would be the easiest way to switch out different components of the system, but did not think about the ramifications of this choice.
 Due to code duplication, large amount of templates can lead to a much larger execution.
@@ -170,7 +186,8 @@ Thus, since inheritance provided a much cleaner code base to work with, we decid
 
 \section{Memory tracking}
 We track memory through the use of C++11 custom allocators.
-Our allocators essentially just wrap malloc and then log where the allocation is coming from--the trie, the map, or the queue.
+Our allocators are simple malloc wrappers that also log which data structure the allocation is coming from--the trie, the map, or the queue.
 We validated the accuracy of this memory tracking by running the program under Valgrind's massif heap profiler tool and comparing the outputs.
-Outputs were within a few hundred bytes, so we concluded that our memory tracking was successful.
-This allowed us to write out our memory usage per data structure without incurring the large overhead of Valgrind.
+Our outputs matched Valgrind's to within a few hundred bytes, so we concluded that our memory tracking was successful.
+The heap profiling of Valgrind has a large overhead, while our memory logging is more limited and therefore overhead is very minimal.
+This allows us to write out our memory usage per data structure on a regular basis without incurring the large overhead of Valgrind.
