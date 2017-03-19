@@ -302,7 +302,7 @@
         \bibliography{references}
         \addcontentsline{toc}{chapter}{References}
         \bibliographystyle{apalike2}
-        \include{endmatter/colophon}
+        %\include{endmatter/colophon}
     \end{spacing}
 }
 

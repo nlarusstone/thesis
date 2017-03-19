@@ -90,7 +90,7 @@ They will differ only in which rules capture which samples, so their accuracy ma
 We can use this knowledge to create a bound as follows.
 If we know that the lower bound of AB is better than the lower bound of BA, we can eliminate from consideration all rule lists beginning with BA.
 This is due to the fact that any corresponding rule list beginning with AB will capture exactly the same samples as the equivalent rule list beginning with BA but will have a better objective score.
-We can eliminate all but one permutation of a given set of rules using this principle.
+Generalizing, we can eliminate all but one permutation of a given set of rules using this principle.
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-permutations.png}

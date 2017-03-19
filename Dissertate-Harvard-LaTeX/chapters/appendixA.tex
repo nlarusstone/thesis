@@ -2,3 +2,159 @@
 \chapter{Proof of Bounds}
 \label{AppendixA}
 
+\section{Rule lists for binary classification}
+We restrict our setting to binary classification.
+
+%
+Let~${\{(x_n, y_n)\}_{n=1}^N}$ denote training data,
+where ${x_n \in \{0, 1\}^J}$ are binary features and ${y_n \in \{0, 1\}}$ are labels.
+%
+Let~${\x = \{x_n\}_{n=1}^N}$ and~${\y = \{y_n\}_{n=1}^N}$,
+and let~${x_{n,j}}$ denote the $j$-th feature of~$x_n$.
+
+A rule list ${\RL = (r_1, r_2, \dots, r_K, r_0)}$ of length~${K \ge 0}$
+is a ${(K+1)}$-tuple consisting of~$K$ distinct association rules,
+${r_k = p_k \rightarrow q_k}$, for ${k = 1, \dots, K}$,
+followed by a default rule~$r_0$.
+
+An association rule~${r = p \rightarrow q}$ is an implication
+corresponding to the conditional statement, ``if~$p$, then~$q$.''
+%
+In our setting, an antecedent~$p$ is a Boolean assertion that
+evaluates to either true or false for each datum~$x_n$,
+and a consequent~$q$ is a label prediction.
+%
+For example, ${(x_{n, 1} = 0) \wedge (x_{n, 3} = 1) \rightarrow (y_n = 1)}$
+is an association rule.
+%
+%The number of conditions in an antecedent is its cardinality;
+%the antecedent in the previous example has a cardinality of two.
+%
+The final default rule~$r_0$ in a rule list can be thought of
+as an association rule~${p_0 \rightarrow q_0}$
+whose antecedent~$p_0$ simply asserts true.
+
+Let ${\RL = (r_1, r_2, \dots, r_K, r_0)}$ be a rule list
+where ${r_k = p_k \rightarrow q_k}$ for each ${k = 0, \dots, K}$.
+%
+We introduce a useful alternate rule list representation:
+${\RL = (\Prefix, \Labels, \Default, K)}$,
+where we define ${\Prefix = (p_1, \dots, p_K)}$ to be $\RL$'s prefix,
+${\Labels = (q_1, \dots, q_K) \in \{0, 1\}^K}$~gives
+the label predictions associated with~$\Prefix$,
+and ${\Default \in \{0, 1\}}$ is the default label prediction.
+%
+In Figure~\ref{fig:rule-list}, ${\RL =}$ ${(r_1, r_2, r_3, r_4, r_0)}$,
+and each rule is of the form ${r_k = p_k \rightarrow q_k}$,
+for all ${k = 0, \dots, 4}$;
+equivalently, ${\RL = (\Prefix, \Labels, \Default, K)}$,
+where ${\Prefix = (p_1, p_2, p_3, p_4)}$, ${\Labels = (1, 1, 1, 1)}$,
+${\Default = 0}$, and ${K=4}$.
+
+Let ${\Prefix = (p_1, \dots, p_k, \dots, p_K)}$ be an antecedent list,
+then for any ${k \le K}$, we define ${\Prefix^k =}$ ${(p_1, \dots, p_k)}$
+to be the $k$-prefix of~$\Prefix$.
+%
+For any such $k$-prefix~$\Prefix^k$,
+we say that~$\Prefix$ starts with~$\Prefix^k$.
+%
+For any given space of rule lists,
+we define~$\StartsWith(\Prefix)$ to be the set of
+all rule lists whose prefixes start with~$\Prefix$:
+\begin{align}
+\StartsWith(\Prefix) =
+\{(\Prefix', \Labels', \Default', K') : \Prefix' \textnormal{ starts with } \Prefix \}.
+\label{eq:starts-with}
+\end{align}
+%We also say that an antecedent list~$\Prefix$ contains another
+%antecedent list~$\Prefix'$ if the antecedents in~$\Prefix'$ correspond to
+% a contiguous subsequence of antecedents anywhere in~$\Prefix$.
+%
+If ${\Prefix = (p_1, \dots, p_K)}$ and ${\Prefix' = (p_1, \dots, p_K, p_{K+1})}$
+are two prefixes such that~$\Prefix'$ starts with~$\Prefix$ and extends it by
+a single antecedent, we say that~$\Prefix$ is the parent of~$\Prefix'$
+and that~$\Prefix'$ is a child of~$\Prefix$.
+
+A rule list~$\RL$ classifies datum~$x_n$ by providing the label prediction~$q_k$
+of the first rule~$r_k$ whose antecedent~$p_k$ is true for~$x_n$.
+%
+We say that an antecedent~$p_k$ of antecedent list~$\Prefix$ captures~$x_n$
+in the context of~$\Prefix$ if~$p_k$ is the first antecedent in~$\Prefix$ that
+evaluates to true for~$x_n$.
+%
+
+A prefix captures those data captured by its antecedents;
+for a rule list~${\RL = (\Prefix, \Labels, \Default, K)}$,
+data not captured by the prefix~$\Prefix$
+are classified according to the default label prediction~$\Default$.
+
+Let~$\beta$ be a set of antecedents.
+%
+We define~${\Cap(x_n, \beta) = 1}$ if an antecedent in~$\beta$
+captures datum~$x_n$, and~0 otherwise.
+%
+For example, let~$\Prefix$ and~$\Prefix'$ be prefixes such that~$\Prefix'$ starts
+with~$\Prefix$, then~$\Prefix'$ captures all the data that~$\Prefix$ captures:
+${\{x_n: \Cap(x_n, \Prefix)\} \subseteq \{x_n: \Cap(x_n, \Prefix')\}}$.
+
+Now let~$\Prefix$ be an ordered list of antecedents,
+and let~$\beta$ be a subset of antecedents in~$\Prefix$.
+%
+Let us define~${\Cap(x_n, \beta \given \Prefix) = 1}$ if~$\beta$
+captures datum~$x_n$ in the context of~$\Prefix$,
+\ie if the first antecedent in~$\Prefix$ that evaluates to true for~$x_n$
+is an antecedent in~$\beta$, and~0 otherwise.
+%
+Thus, ${\Cap(x_n, \beta \given \Prefix) = 1}$ only if ${\Cap(x_n, \beta) = 1}$;
+${\Cap(x_n, \beta \given \Prefix) = 0}$ either if ${\Cap(x_n, \beta) = 0}$,
+or if ${\Cap(x_n, \beta) = 1}$ but there is an antecedent~$\alpha$ in~$\Prefix$,
+preceding all antecedents in~$\beta$, such that ${\Cap(x_n, \alpha) = 1}$.
+%
+For example, if ${\Prefix = (p_1, \dots, p_k, \dots, p_K)}$ is a prefix, then
+\begin{align}
+\Cap(x_n, p_k \given \Prefix) =
+  \left(\bigwedge_{k'=1}^{k - 1} \neg\, \Cap(x_n, p_{k'}) \right)
+  \wedge \Cap(x_n, p_k)
+\end{align}
+indicates whether antecedent~$p_k$ captures datum~$x_n$ in the context of~$\Prefix$.
+%
+Now, define ${\Supp(\beta, \x)}$ to be the normalized support of~$\beta$,
+\begin{align}
+\Supp(\beta, \x) = \frac{1}{N} \sum_{n=1}^N \Cap(x_n, \beta),
+\label{eq:support}
+\end{align}
+and similarly define~${\Supp(\beta, \x \given \Prefix)}$
+to be the normalized support of~$\beta$ in the context of~$\Prefix$,
+\begin{align}
+\Supp(\beta, \x \given \Prefix) = \frac{1}{N} \sum_{n=1}^N \Cap(x_n, \beta \given \Prefix),
+\label{eq:support-context}
+\end{align}
+
+Next, we address how empirical data constrains rule lists.
+%
+Given training data~${(\x, \y)}$,
+an antecedent list ${\Prefix = (p_1, \dots, p_K)}$
+implies a rule list ${\RL = (\Prefix, \Labels, \Default, K)}$
+with prefix~$\Prefix$, where the label predictions
+${\Labels = (q_1, \dots, q_K)}$ and~$\Default$ are empirically set
+to minimize the number of misclassification errors made by
+the rule list on the training data.
+%
+Thus for~${1 \le k \le K}$, label prediction~$q_k$ corresponds to the
+majority label of data captured by antecedent~$p_k$ in the context of~$\Prefix$,
+and the default~$\Default$ corresponds to the majority label of data
+not captured by~$\Prefix$.
+%
+In the remainder of our presentation, whenever we refer to a rule list with a
+particular prefix, we implicitly assume these empirically determined label predictions.
+
+Finally, we note that our approach leverages pre-mined rules,
+following the methodology taken by~\citet{LethamRuMcMa15} and~\citet{YangRuSe16}.
+%
+One of the results we later prove implies a constraint
+that can be used as a filter during rule mining --
+antecedents must have at least some minimum support
+(Theorem~\ref{thm:min-capture}).
+
+\section{Objective Function}
+\label{sec:objective}
