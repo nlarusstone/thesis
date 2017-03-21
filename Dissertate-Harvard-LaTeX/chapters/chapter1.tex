@@ -6,8 +6,8 @@
 
 \chapter{Related Work}
 
-The use of classification models is popular in a number of different fields from image recognition \cite{Javidi02} to churn prediction \cite{LemmensCr06}.
-Oftentimes, however, simply receiving a prediction from software is not enough--it is important to have a predictive model that humans can investigate and understand \cite{Ruping06, Bratko97, Quinlan99, Martens11, Freitas14}.
+The use of classification models is popular in a number of different fields from image recognition \cite{LeCunBoBeHa98} to churn prediction \cite{LemmensCr06}.
+Oftentimes, however, simply receiving a prediction from software is not enough--it is important to have a predictive model that humans can investigate and understand \cite{Bratko97, Quinlan99, Ruping06, MartensVaVeBa11, Freitas14}.
 For example, in fields such as medical diagnoses \cite{BellazziZu08} and criminal sentencing \cite{LarsonMaKiAn16}, it is important to be able to investigate the reasons behind a model's predictions.
 One reason is that medical experts are unlikely to trust the predictions of these models if they are unable to understand why the model is making certain predictions \cite{Lavrač99}.
 Interpretable models also allow users to examine predictions to detect systemic biases in the model.
@@ -53,11 +53,13 @@ This framework creates features from the raw binary data and then builds rules o
 Yang et al builds on this earlier work by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
 We use that bit vector manipulation library to help perform computations involving calculating accuracy of rules \cite{YangRuSe16}.
 
-Our use of a branch and bound technique is inspired by the fact that it is often applied to problems that have a large number of potential solutions without a polynomial time algorithm.
+Branch and bound was a technique originally developed to solve linear programming problems \cite{LandDo60}.
 The branch and bound algorithm recursively splits the data into subgroups, yielding a tree-like structure.
 Then, by calculating a value corresponding to the end goal of the algorithm (e.g., accuracy), some branches of the tree can be proved to be worse in every case than another branch and therefore can be pruned, reducing the search space.
-This technique has been used to solve NP-hard problems such as the Traveling Salesman Problem \cite{LittleMuSwKa63}, the Knapsack Problem \cite{Kolesar67}, or the Mixed Integer Programming problems \cite{Clausen99}.
-Branch and Bound is also used as an optimization technique for some machine learning algorithms, though it has not been applied to decision lists before now \cite{ChapelleSiKe06}.
+For decades, it has been used to great effect in the realm of mixed integer programming \cite{LinderothSa99}.
+It has also been applied to other NP-hard problems such as the Traveling Salesman Problem \cite{LittleMuSwKa63} and the Knapsack Problem \cite{Kolesar67}.
+More recently, it has been applied to machine learning problems such as feature subset selection \cite{NarendraFu77} and clustering \cite{NarendraFu75}.
+However, in recent times its popularity has declined in favor of convex optimization methods such as neural nets.
 
 TODO: Complete paragraph about discrete optimization/bounds in 90s
 
