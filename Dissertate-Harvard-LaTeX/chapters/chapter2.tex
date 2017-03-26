@@ -1,59 +1,111 @@
 %!TEX root = ../dissertation.tex
 \chapter{Definitions}\label{ch:definitions}
-\newthought{We present definitions and explanations} of concepts and terms that are used throughout this work.
+\newthought{We present definitions and explanations} of concepts and terms that are used throughout this work. 
+We motivate these definitions with a toy dataset, Computer, attempting to answer the problem of predicting whether someone owns a Mac or a PC.
+Let us assume that this dataset is composed of 20 individuals and various pieces of information about them.
 
 \section{Rules}
+
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State Rule 1: \bif $age < 25$ \bthen $Mac$\,
+\includegraphics[width=0.5\textwidth]{figs/rule_1_cap.png}
+
+\State Rule 2: \bif $college == yes$ \bthen $Mac$\,
+
+\State Rule 3: \bif $age > 45 \wedge \neg Software Engineer$ \bthen $PC$\,
+
+\State Rule 4: \bif $\neg lives in California$ \bthen $PC$\,
+\includegraphics[width=0.5\textwidth]{figs/rule_4_cap.png}
+
+\end{algorithmic}
+%\vspace{-3mm}
+\caption{Example rules from the Computer dataset.
+The filled in boxes represent data points that are classified by a rule.
+Boxes that are outlined in red are data points that are classified incorrectly.
+}
+\label{fig:rules}
+\end{figure}
+
 A \textit{rule} is an IF-THEN statement consisting of a boolean antecedent and a classification label.
-We are working in the realm of binary classification, so the label is either a 0 or a 1.
-The boolean antecedents are generated from the rule mining mechanism and are a conjunction of boolean features.
-These antecedents are satisfied by some data points (also called \textit{samples}) and not for others.
+We are working in the realm of binary classification, so the label is either a 0 or a 1 (or an equivalent label).
+The boolean antecedents are generated from the rule mining mechanism \cite{LethamRuMcMa15} and are a conjunction of boolean features.
+Fig \ref{fig:rules} provides an example of 4 rules that could be mined from the Computer dataset.
+These antecedents are \textit{satisfied} by some data points (also called \textit{samples}) and not for others.
 We say a rule \textit{classifies} a given data point when the antecedent is satisfied for that data point.
-As we combine these rules into rule lists, only the first rule that classifies any given data point can make a prediction for that data point.
-Thus, we say a rule \textit{captures} a given data point if it is the first rule in a rule list to classify that data point.
+A rule's \textit{support} is composed of all of the data points that are classified by a rule.
+Thus, we can see that rules have an inherent accuracy.
+For example, Rule 1, above, may have a support of 5 but only classify 4 of those data points correctly, yielding an inherent accuracy of 80\%.
 
 \section{Rule Lists}
+
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State \bif $age < 25$ \bthen $Mac$\,
+\State \belif $\neg lives in California$ \bthen $PC$\,
+\State \belse $PC$
+\end{algorithmic}
+
+\includegraphics[width=0.5\textwidth]{figs/rule_list_1_cap.png}
+%\vspace{-3mm}
+\caption{Rule list with rule 1 then rule 4 and a default rule.}
+\label{fig:rule-list-1}
+\end{figure}
+
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State \bif $\neg lives in California$ \bthen $PC$\,
+\State \belif $age < 25$ \bthen $Mac$\,
+\State \belse $PC$
+\end{algorithmic}
+
+\includegraphics[width=0.5\textwidth]{figs/rule_list_2_cap.png}
+%\vspace{-3mm}
+\caption{Rule list with rule 4 then rule 1 and a default rule. Identical to the rule list in Fig \ref{fig:rule-list-1} up to a permutation.}
+\label{fig:rule-list-2}
+\end{figure}
+
 %Let us define a training dataset of size N as $\{x_n, y_n\}_{n=1}^N$ where each $x_n \in \{0, 1\}^J$ are binary features and each $y_n \in \{0, 1\}$ are binary labels.
 %Each rule $x_n$ therefore classifies some of the data points (those indices where $x_{n, j} = 1$).
 %Define a rulelist $\mathbf{r} = (r_1, r_2, ... , r_k, r_0)$ where each $r_i \in \{x_n\}_{n=1}^N, \forall i > 0$.
 %$r_0$ is defined as the default rule, which makes a prediction on all data points that are not captured in rules $1 ... k$. 
 A \textit{rule list} is an ordered collection of rules.
 As defined above, rules have an inherent accuracy based on what data they classify and how they predict the label.
-When they are placed into a rule list, however, their accuracy is based on what data they capture---which is usually not the same as what data they classify.
+As we combine these rules into rule lists, however, only the first rule that classifies any given data point can make a prediction for that data point.
+Thus, we say a rule \textit{captures} a given data point if it is the first rule in a rule list to classify that data point.
+Therefore, when rules are placed into a rule list, their accuracy is based on what data they capture---which is not necessarily the same as what data they classify.
 They can perform better or worse than their inherent accuracy depending on what rules come before them in a given rule list.
+For example, we can see in Fig \ref{fig:rule-list-1} that even though rule 4 only has an inherent accuracy of 60\%, it has an accuracy of 100\% when placed below rule 1.
+
 Thus, our algorithm is focused on finding the list composed of the best rules and the order that maximizes predictive accuracy.
 A rule list also has a \textit{default rule}, placed at the end of all of these rules, that classifies all data points and predicts the majority label.
 This allows a rule list to make predictions for all points because any point not captured by the pre-mined rules is therefore captured by the default rule.
-We refer to the set of rules that compose a rule list, not including the default rule, as a \textit{prefix}.
-
-\begin{figure}[t!]
-%\vspace{-3mm}
-\begin{algorithmic}
-\normalsize
-\State \bif $(age=23-25) \wedge (priors=2-3)$ \bthen $yes$
-\State \belif $(age=18-20)$ \bthen $yes$
-\State \belif $(sex=male) \wedge (age=21-22)$ \bthen $yes$
-\State \belif $(priors>3)$ \bthen $yes$
-\State \belse $no$
-\end{algorithmic}
-%\vspace{-3mm}
-\caption{An example rule list that predicts two-year recidivism for the COMPAS dataset, found by CORELS.}
-\label{fig:rule-list}
-\end{figure}
+We define a \textit{prefix} as a subset of a rule list that composes the beginning of that rule list.
+Finally, we refer to the length of a rule list as the number of rules, not including the default rule.
 
 \section{Objective Function}
 Rule lists have a loss function based on the number of points that are misclassified by the rules in the rule list.
-We define our \textit{objective} function to be the sum of that loss and a regularization term.
-We use a \textit{regularization} term, which is a constant times the length of the rule list.
+We define our \textit{objective} function to be the sum of that loss and a \texit{regularization term}, which is a constant times the length of the rule list.
 This has the effect of preventing overfitting on training data sets as well as preventing extremely long, and therefore uninterpretable, rule lists.
-While the objective is related to accuracy (a higher accuracy means a lower objective), we will be optimizing over the objective function instead of just the accuracy in order to get the benefits of the regularization term.
+While the objective is related to accuracy (a higher accuracy means a lower objective), we will be optimizing over the objective function instead of the accuracy to reap the benefits of the regularization term.
+Let RL be a rule list:
 
 \begin{math}
 objective(RL) = loss(RL) + c * len(RL)
 \end{math}
 
+We can see that the loss from the rules is $0.05$, while the loss from the default rule is $0.10$.
+Assuming $c=0.01$, we can see the objective of the rule list in Fig \ref{fig:rule-list-1} is $0.05 + 0.10 + 2 * 0.01 = 0.17$.
+
 \section{Bounds}\label{sec:bounds}
 For a set of $n$ rules, there are $n!$ possible rule lists.
-Finding the optimal rule list using a brutal force is infeasible for any problem of reasonable size.
+Finding the optimal rule list using a brute force approach is infeasible for any problem of reasonable size.
 Our algorithm uses the discrete optimization technique of branch-and-bound to solve the combinatorially difficult problem of finding an optimal rule list.
 This requires tight bounds that allow us to prune as much of the search space as possible.
 These bounds are formalized and proved in Angelino et al. \cite{AngelinoLaAlSeRu17} and are reproduced in Appendix A.
@@ -61,21 +113,21 @@ For clarity we present informal summaries of the important bounds here.
 
 \subsection{Lower Bound}
 We use the term \textit{lower bound} to mean the best possible outcome for the objective function for a given prefix.
-We do this by calculating the error of the prefix and assuming that any points uncaptured by the prefix will be predicted correctly.
+We do this by calculating the loss of the prefix and assuming that any points not captured by the prefix will be predicted correctly.
 This is equivalent to assuming that the default rule captures all points perfectly.
-Because any future extensions of the prefix can only ever make mistakes, we will be able to use it to prune our exploration.
+Because any future extensions of the prefix can never do better than this perfect default rule, we will be able to use it to prune our exploration.
 An important property of the lower bound is that it increases monotonically.
 
 \subsection{Hierarchical Objective Bound}
 The main bound for our algorithm is the \textit{hierarchical objective bound}. 
-It says that we do not need to purse a rule list if it has a lower bound that is worse than the best objective we have already seen.
+It says that we do not need to pursue a rule list if it has a lower bound that is worse than the best objective we have already seen.
 This follows from the fact that lower bounds increase monotonically, so if the lower bound of rule list A is worse than the objective of rule list B, any extensions of rule list A can never be better than rule list B.
 This allows us to prune large parts of the search space by not pursuing rule lists that could never be better than something we've already seen.
 
 \begin{figure}
-\includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-tree.png}
-\includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-tree-pruned.png}
-\caption[Objective bound]{This tree shows the hierarchical objective bound in action. Our best objective seen is the prefix (blue, gray) with an objective of $0.10$. Any prefixes with lower bound greater than this objective--(gray), (red, green), (green, gray) can be pruned and not ever looked at.
+\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-tree.png}
+\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-tree-pruned.png}
+\caption[Objective bound]{This tree shows the hierarchical objective bound in action. Our best objective seen is the prefix (blue, gray) with an objective of $0.10$. Any prefixes with lower bound greater than this objective--(gray), (red, green), (green, gray) can be pruned and not ever examined.
 \label{fig:objective-bound}}
 \end{figure}
 
@@ -93,8 +145,8 @@ This is due to the fact that any corresponding rule list beginning with AB will 
 Generalizing, we can eliminate all but one permutation of a given set of rules using this principle.
 
 \begin{figure}
-\includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-permutations.png}
-\includegraphics[width=0.5\textwidth]{figs/ela_branch-and-bound-permutations-pruned.png}
+\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-permutations.png}
+\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-permutations-pruned.png}
 \caption[Permutation bound]{This tree shows the use of the permutation bound. Prefixes (blue, green) and (green, blue) are permutations of each other, so their lower bounds can be compared. The prefix (green, blue) has a better lower bound, so (blue, green) can be pruned and none of its children have to be examined.
 \label{fig:permutation-bound}}
 \end{figure}
@@ -126,7 +178,7 @@ Curiosity is a function of both the lower bound and the number of samples captur
 This prioritizes rule lists that still have many samples left to capture (exploration) while also pursuing rule lists with promising lower bounds (exploitation).
 
 \begin{math}
-curiosity(RL) = lowerBound(RL) - c * (len(RL) - 1)  * (nsamples / |captured(RL)|)
+curiosity(RL) = (lowerBound(RL) - c * (len(RL) - 1))  * (nsamples / |captured(RL)|)
 \end{math}
 
 \section{Remaining Search Space}

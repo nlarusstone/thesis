@@ -11,25 +11,25 @@ Oftentimes, however, simply receiving a prediction from software is not enough--
 For example, in fields such as medical diagnoses \cite{BellazziZu08} and criminal sentencing \cite{LarsonMaKiAn16}, it is important to be able to investigate the reasons behind a model's predictions.
 One reason is that medical experts are unlikely to trust the predictions of these models if they are unable to understand why the model is making certain predictions \cite{Lavrač99}.
 Interpretable models also allow users to examine predictions to detect systemic biases in the model.
-This is especially important in classification problems such as criminal recidivism prediction where there are often race-related biases \cite{LarsonMaKiAn16} or credit scoring where a justification is necessary for the denial of credit \cite{BaesensMuDeVaSe05}.
+This is especially important in classification problems, such as criminal recidivism prediction, where there are often race-related biases \cite{LarsonMaKiAn16} or credit scoring where a justification is necessary for the denial of credit \cite{BaesensMuDeVaSe05}.
 
-Tree structured classifiers are a popular technique that combines interpretability with a high predictive accuracy.
+Tree structured classifiers are a popular technique that combines interpretability with high predictive accuracy.
 Also called decision trees, these trees are often used as either classification or regression tools.
 Every node in the tree classifier splits the data into two subsets; these subsets are then recursively split by nodes lower in the tree.
-Nodes are constructed by choosing an attribute that splits the data in order to minimize a certain metric.
+Nodes are constructed by choosing an attribute that splits the data to minimize a certain metric.
 This metric differs from algorithm to algorithm, but it is usually focused on separating similar items into their own groups.%, but one common metric is attempting to  impurity of each subset.
-Trees are constructed by recursively performing splits on the child subsets until the resulting subset is entirely homogenous according to the metric or small enough according to some threshold.
-Methods for constructing decision trees differ primarily based on how they define this metric and therefore what attributes they choose for each node.
-Breiman et al laid out an seminal algorithm, CART, to create such trees \cite{BreimanFrOlSt84}.
+Trees are constructed by recursively performing splits on the child subsets until the resulting subset is either entirely homogenous according to the metric or small enough according to some threshold.
+Methods for constructing decision trees differ primarily based on how they define this metric and what attributes they choose for each node.
+Breiman et al. laid out an seminal algorithm, CART, to create such trees \cite{BreimanFrOlSt84}.
 CART tries to minimize Gini impurity which is a measure of the probability that any random element taken from a node is mislabeled.
 Another popular algorithm, C4.5, uses the idea of information gain to make its splits instead \cite{Quinlan93}.
 In C4.5, nodes are chosen such that each split minimizes the amount of information necessary to reconstruct the original data.
 Both algorithms grow the initial tree greedily.
-However, this will lead to extremely large trees, so they perform a post-processing step of pruning to avoid overfitting and maintain interpretability.
+However, this leads to extremely large trees, so they perform a post-processing step of pruning to avoid overfitting and maintain interpretability.
 
 While most decision trees are constructed greedily, and thus sub-optimally, there has been some work on constructing optimal decision trees \cite{Moret82}.
 There has even been the use of a branch and bound technique in an attempt to construct more optimal decision trees.
-Garofalakis et al introduce an algorithm to generate more interpretable decision trees by allowing constraints to be placed on the size of the decision tree \cite{GarofalakisHyRaSh00}.
+Garofalakis et al. introduce an algorithm to generate more interpretable decision trees by allowing constraints to be placed on the size of the decision tree \cite{GarofalakisHyRaSh00}.
 They use the branch-and-bound technique to constrain the size of the search space and limit the eventual size of the decision tree.
 During tree construction, they bound the possible Minimum Description Length (MDL) cost of every different split at a given node.
 If every split at that node leads to a more expensive tree than the MDL cost of the current subtree, then that node can be pruned.
@@ -46,11 +46,11 @@ Work in the field of decision lists focuses both on the generation of new theore
 Recent work on improving accuracy has led to the creation of probabilistic decision lists that generate a posterior distribution over the space of potential decision lists \cite{LethamRuMcMa15,YangRuSe16}.
 These methods achieve good accuracy while maintaining a small execution time.
 In addition, these methods improve on existing methods, such as CART or C4.5, by optimizing over the global space of decision lists as opposed to searching for rules greedily and getting stuck at local optima.
-Letham et al are able to do this by pre-mining rules, which reduces the search space from every possible split of the data to a discrete number of rules.
+Letham et al. are able to do this by pre-mining rules, which reduces the search space from every possible split of the data to a discrete number of rules.
 We take the same approach towards optimizing over the global search space, though we don’t use probabilistic techniques.
-We also want to work in a regime with a discrete number of rules, thus we use the same rule mining framework from Letham et al to generate the rules for our data sets \cite{LethamRuMcMa15}.
+We also want to work in a regime with a discrete number of rules, thus we use the same rule mining framework from Letham et al. to generate the rules for our data sets \cite{LethamRuMcMa15}.
 This framework creates features from the raw binary data and then builds rules out of those features.
-Yang et al builds on this earlier work by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
+Yang et al. builds on this earlier work by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
 We use that bit vector manipulation library to help perform computations involving calculating accuracy of rules \cite{YangRuSe16}.
 
 Branch and bound was a technique originally developed to solve linear programming problems \cite{LandDo60}.

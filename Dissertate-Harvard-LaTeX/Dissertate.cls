@@ -33,7 +33,7 @@
 % Line Spacing
 %   Define two line spacings: one for the body, and one that is more compressed.
 \iftoggle{DissertateSingleSpace}{
-    \newcommand{\dnormalspacing}{1.2}
+    \newcommand{\dnormalspacing}{1.0}
     \newcommand{\dcompressedspacing}{1.0}
 }{
     \newcommand{\dnormalspacing}{2.0}
@@ -306,6 +306,7 @@
     \end{spacing}
 }
 
+
 % Nicholas' Customizations
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -316,6 +317,8 @@
 %\usepackage{graphicx,verbatim}
 \usepackage{listings}
 %\usepackage{subcaption}
+
+%\renewcommand{\cite}{\citation}
 
 \newcommand{\x}{\mathbf{x}}
 \def\bif{\bf if~}

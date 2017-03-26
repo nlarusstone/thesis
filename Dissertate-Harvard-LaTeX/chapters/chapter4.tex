@@ -27,6 +27,21 @@ We will also show that even with our improvements, this algorithm would not have
 Next, we will examine the improvements made to our symmetry-aware map to reduce the memory overhead on our algorithm.
 Finally, we will explore a parallel implementation.
 
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State \bif $(age=23-25) \wedge (priors=2-3)$ \bthen $yes$
+\State \belif $(age=18-20)$ \bthen $yes$
+\State \belif $(sex=male) \wedge (age=21-22)$ \bthen $yes$
+\State \belif $(priors>3)$ \bthen $yes$
+\State \belse $no$
+\end{algorithmic}
+%\vspace{-3mm}
+\caption{An example rule list that predicts two-year recidivism for the COMPAS dataset, found by CORELS.}
+\label{fig:rule-list}
+\end{figure}
+
 \section{Ablation--how much does each bound/optimization help?}
 
 We wished to determine how much each theoretical bound and data structure optimization helped, so that we could determine which one was the most helpful.
