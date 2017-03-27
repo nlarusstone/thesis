@@ -79,12 +79,12 @@
 \RequirePackage{url}
 \RequirePackage{amssymb}
 \RequirePackage{mathspec}
-\setmathsfont(Digits,Latin,Greek)[Numbers={Proportional}]{EB Garamond}
-\setmathrm{EB Garamond}
+%\setmathsfont(Digits,Latin,Greek)[Numbers={Proportional}]{EB Garamond}
+%\setmathrm{EB Garamond}
 \AtBeginEnvironment{tabular}{\addfontfeature{RawFeature=+tnum}}
 \widowpenalty=300
 \clubpenalty=300
-\setromanfont[Numbers=OldStyle, Ligatures={Common, TeX}, Scale=1.0]{EB Garamond}
+%\setromanfont[Ligatures={Common, TeX}, Scale=1.0]{EB Garamond}
 \newfontfamily{\smallcaps}[RawFeature={+c2sc,+scmp}]{EB Garamond}
 \setsansfont[Scale=MatchLowercase, BoldFont={Lato Bold}]{Lato Regular}
 \setmonofont[Scale=MatchLowercase]{Source Code Pro}
@@ -309,6 +309,7 @@
 
 % Nicholas' Customizations
 \usepackage{algorithm}
+%\usepackage[ruled,noend]{algorithm2e}
 \usepackage[noend]{algpseudocode}
 \usepackage{amsmath,amsthm}
 %\usepackage{amsfonts}
@@ -316,7 +317,10 @@
 \usepackage{comment}
 %\usepackage{graphicx,verbatim}
 \usepackage{listings}
-%\usepackage{subcaption}
+\usepackage{subcaption}
+\captionsetup{compatibility=false}
+\DeclareCaptionSubType*{algorithm}
+\renewcommand\thesubalgorithm{\thetable\alph{subalgorithm}}
 
 %\renewcommand{\cite}{\citation}
 

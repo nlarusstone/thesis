@@ -1,190 +1,68 @@
 %!TEX root = ../dissertation.tex
-\chapter{Definitions}\label{ch:definitions}
-\newthought{We present definitions and explanations} of concepts and terms that are used throughout this work. 
-We motivate these definitions with a toy dataset, Computer, attempting to answer the problem of predicting whether someone owns a Mac or a PC.
-Let us assume that this dataset is composed of 20 individuals and various pieces of information about them.
+%\begin{savequote}[75mm]
+%Nulla facilisi. In vel sem. Morbi id urna in diam dignissim feugiat. Proin molestie tortor eu velit. Aliquam erat volutpat. Nullam ultrices, diam tempus vulputate egestas, eros pede varius leo.
+%\qauthor{Quoteauthor Lastname}
+%\end{savequote}
 
-\section{Rules}
+\chapter{Related Work}
 
-\begin{figure}[t!]
-%\vspace{-3mm}
-\begin{algorithmic}
-\normalsize
-\State Rule 1: \bif $age < 25$ \bthen $Mac$\,
-\includegraphics[width=0.5\textwidth]{figs/rule_1_cap.png}
+The use of classification models is popular in a number of different fields from image recognition \cite{LeCunBoBeHa98} to churn prediction \cite{LemmensCr06}.
+Oftentimes, however, simply receiving a prediction from software is not enough--it is important to have a predictive model that humans can investigate and understand \cite{Bratko97, Quinlan99, Ruping06, MartensVaVeBa11, Freitas14}.
+For example, in fields such as medical diagnoses \cite{BellazziZu08} and criminal sentencing \cite{LarsonMaKiAn16}, it is important to be able to investigate the reasons behind a model's predictions.
+One reason is that medical experts are unlikely to trust the predictions of these models if they are unable to understand why the model is making certain predictions \cite{Lavrač99}.
+Interpretable models also allow users to examine predictions to detect systemic biases in the model.
+This is especially important in classification problems, such as criminal recidivism prediction, where there are often race-related biases \cite{LarsonMaKiAn16} or credit scoring where a justification is necessary for the denial of credit \cite{BaesensMuDeVaSe05}.
 
-\State Rule 2: \bif $college == yes$ \bthen $Mac$\,
+Tree structured classifiers are a popular technique that combines interpretability with high predictive accuracy.
+Also called decision trees, these trees are often used as either classification or regression tools.
+Every node in the tree classifier splits the data into two subsets; these subsets are then recursively split by nodes lower in the tree.
+Nodes are constructed by choosing an attribute that splits the data to minimize a certain metric.
+This metric differs from algorithm to algorithm, but it is usually focused on separating similar items into their own groups.%, but one common metric is attempting to  impurity of each subset.
+Trees are constructed by recursively performing splits on the child subsets until the resulting subset is either entirely homogenous according to the metric or small enough according to some threshold.
+Methods for constructing decision trees differ primarily based on how they define this metric and what attributes they choose for each node.
+Breiman et al. laid out an seminal algorithm, CART, to create such trees \cite{BreimanFrOlSt84}.
+CART tries to minimize Gini impurity which is a measure of the probability that any random element taken from a node is mislabeled.
+Another popular algorithm, C$4.5$, uses the idea of information gain to make its splits instead \cite{Quinlan93}.
+In C$4.5$, nodes are chosen such that each split minimizes the amount of information necessary to reconstruct the original data.
+Both algorithms grow the initial tree greedily.
+However, this leads to extremely large trees, so they perform a post-processing step of pruning to avoid overfitting and maintain interpretability.
 
-\State Rule 3: \bif $age > 45 \wedge \neg Software Engineer$ \bthen $PC$\,
+While most decision trees are constructed greedily, and thus sub-optimally, there has been some work on constructing optimal decision trees \cite{Moret82}.
+There has even been the use of a branch and bound technique in an attempt to construct more optimal decision trees.
+Garofalakis et al. introduce an algorithm to generate more interpretable decision trees by allowing constraints to be placed on the size of the decision tree \cite{GarofalakisHyRaSh00}.
+They use the branch-and-bound technique to constrain the size of the search space and limit the eventual size of the decision tree.
+During tree construction, they bound the possible Minimum Description Length (MDL) cost of every different split at a given node.
+If every split at that node leads to a more expensive tree than the MDL cost of the current subtree, then that node can be pruned.
+In this way, they were able to prune the tree while constructing it instead of just constructing the tree and then pruning at the end.
+However, even with the added bounds, this approach did not yield globally optimal decision trees, because they constrained the number of nodes in the tree.
 
-\State Rule 4: \bif $\neg lives in California$ \bthen $PC$\,
-\includegraphics[width=0.5\textwidth]{figs/rule_4_cap.png}
+Whereas decision trees are always grown from the top downwards, decision lists are built while considering the entire pool of rules.
+Thus, while decision trees are often unable to achieve optimal performance even on simple tasks such as determining the winner of a tic-tac-toe game, decision lists can achieve globally optimal performance.
+Decision lists are a generalization of decision trees since any decision tree can be converted to a decision list through the creation of rules to represent the leaves of the decision tree \cite{Rivest87}.
+Thus, decision list algorithms are a direct competitor to the popular interpretable methods detailed above: CART and C$4.5$.
+Indeed, decision list algorithms are being used for a number of real world applications including stroke prediction \cite{LethamRuMcMa15}, suggesting medical treatments \cite{ZhangLaTsDa2015}, and text classification \cite{LiYa02}.
 
-\end{algorithmic}
-%\vspace{-3mm}
-\caption{Example rules from the Computer dataset.
-The filled in boxes represent data points that are classified by a rule.
-Boxes that are outlined in red are data points that are classified incorrectly.
-}
-\label{fig:rules}
-\end{figure}
+Work in the field of decision lists focuses both on the generation of new theoretical bounds and the improvement of predictive accuracy of models.
+Recent work on improving accuracy has led to the creation of probabilistic decision lists that generate a posterior distribution over the space of potential decision lists \cite{LethamRuMcMa15,YangRuSe16}.
+These methods achieve good accuracy while maintaining a small execution time.
+In addition, these methods improve on existing methods, such as CART or C4.5, by optimizing over the global space of decision lists as opposed to searching for rules greedily and getting stuck at local optima.
+Letham et al. are able to do this by pre-mining rules, which reduces the search space from every possible split of the data to a discrete number of rules.
+We take the same approach towards optimizing over the global search space, though we don’t use probabilistic techniques.
+We also want to work in a regime with a discrete number of rules, thus we use the same rule mining framework from Letham et al. to generate the rules for our data sets \cite{LethamRuMcMa15}.
+This framework creates features from the raw binary data and then builds rules out of those features.
+Yang et al. builds on this earlier work by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
+We use that bit vector manipulation library to help perform computations involving calculating accuracy of rules \cite{YangRuSe16}.
 
-A \textit{rule} is an IF-THEN statement consisting of a boolean antecedent and a classification label.
-We are working in the realm of binary classification, so the label is either a 0 or a 1 (or an equivalent label).
-The boolean antecedents are generated from the rule mining mechanism \cite{LethamRuMcMa15} and are a conjunction of boolean features.
-Fig \ref{fig:rules} provides an example of 4 rules that could be mined from the Computer dataset.
-These antecedents are \textit{satisfied} by some data points (also called \textit{samples}) and not for others.
-We say a rule \textit{classifies} a given data point when the antecedent is satisfied for that data point.
-A rule's \textit{support} is composed of all of the data points that are classified by a rule.
-Thus, we can see that rules have an inherent accuracy.
-For example, Rule 1, above, may have a support of 5 but only classify 4 of those data points correctly, yielding an inherent accuracy of 80\%.
+Branch and bound was a technique originally developed to solve linear programming problems \cite{LandDo60}.
+The branch and bound algorithm recursively splits the data into subgroups, yielding a tree-like structure.
+Then, by calculating a value corresponding to the end goal of the algorithm (e.g., accuracy), some branches of the tree can be proved to be worse in every case than another branch and therefore can be pruned, reducing the search space.
+For decades, it has been used to great effect in the realm of mixed integer programming \cite{LinderothSa99}.
+It has also been applied to other NP-hard problems such as the Traveling Salesman Problem \cite{LittleMuSwKa63} and the Knapsack Problem \cite{Kolesar67}.
+More recently, it has been applied to machine learning problems such as feature subset selection \cite{NarendraFu77} and clustering \cite{NarendraFu75}.
+However, in recent times its popularity has declined in favor of convex optimization methods such as neural nets.
 
-\section{Rule Lists}
+TODO: Complete paragraph about discrete optimization/bounds in 90s
 
-\begin{figure}[t!]
-%\vspace{-3mm}
-\begin{algorithmic}
-\normalsize
-\State \bif $age < 25$ \bthen $Mac$\,
-\State \belif $\neg lives in California$ \bthen $PC$\,
-\State \belse $PC$
-\end{algorithmic}
-
-\includegraphics[width=0.5\textwidth]{figs/rule_list_1_cap.png}
-%\vspace{-3mm}
-\caption{Rule list with rule 1 then rule 4 and a default rule.}
-\label{fig:rule-list-1}
-\end{figure}
-
-\begin{figure}[t!]
-%\vspace{-3mm}
-\begin{algorithmic}
-\normalsize
-\State \bif $\neg lives in California$ \bthen $PC$\,
-\State \belif $age < 25$ \bthen $Mac$\,
-\State \belse $PC$
-\end{algorithmic}
-
-\includegraphics[width=0.5\textwidth]{figs/rule_list_2_cap.png}
-%\vspace{-3mm}
-\caption{Rule list with rule 4 then rule 1 and a default rule. Identical to the rule list in Fig \ref{fig:rule-list-1} up to a permutation.}
-\label{fig:rule-list-2}
-\end{figure}
-
-%Let us define a training dataset of size N as $\{x_n, y_n\}_{n=1}^N$ where each $x_n \in \{0, 1\}^J$ are binary features and each $y_n \in \{0, 1\}$ are binary labels.
-%Each rule $x_n$ therefore classifies some of the data points (those indices where $x_{n, j} = 1$).
-%Define a rulelist $\mathbf{r} = (r_1, r_2, ... , r_k, r_0)$ where each $r_i \in \{x_n\}_{n=1}^N, \forall i > 0$.
-%$r_0$ is defined as the default rule, which makes a prediction on all data points that are not captured in rules $1 ... k$. 
-A \textit{rule list} is an ordered collection of rules.
-As defined above, rules have an inherent accuracy based on what data they classify and how they predict the label.
-As we combine these rules into rule lists, however, only the first rule that classifies any given data point can make a prediction for that data point.
-Thus, we say a rule \textit{captures} a given data point if it is the first rule in a rule list to classify that data point.
-Therefore, when rules are placed into a rule list, their accuracy is based on what data they capture---which is not necessarily the same as what data they classify.
-They can perform better or worse than their inherent accuracy depending on what rules come before them in a given rule list.
-For example, we can see in Fig \ref{fig:rule-list-1} that even though rule 4 only has an inherent accuracy of 60\%, it has an accuracy of 100\% when placed below rule 1.
-
-Thus, our algorithm is focused on finding the list composed of the best rules and the order that maximizes predictive accuracy.
-A rule list also has a \textit{default rule}, placed at the end of all of these rules, that classifies all data points and predicts the majority label.
-This allows a rule list to make predictions for all points because any point not captured by the pre-mined rules is therefore captured by the default rule.
-We define a \textit{prefix} as a subset of a rule list that composes the beginning of that rule list.
-Finally, we refer to the length of a rule list as the number of rules, not including the default rule.
-
-\section{Objective Function}
-Rule lists have a loss function based on the number of points that are misclassified by the rules in the rule list.
-We define our \textit{objective} function to be the sum of that loss and a \texit{regularization term}, which is a constant times the length of the rule list.
-This has the effect of preventing overfitting on training data sets as well as preventing extremely long, and therefore uninterpretable, rule lists.
-While the objective is related to accuracy (a higher accuracy means a lower objective), we will be optimizing over the objective function instead of the accuracy to reap the benefits of the regularization term.
-Let RL be a rule list:
-
-\begin{math}
-objective(RL) = loss(RL) + c * len(RL)
-\end{math}
-
-We can see that the loss from the rules is $0.05$, while the loss from the default rule is $0.10$.
-Assuming $c=0.01$, we can see the objective of the rule list in Fig \ref{fig:rule-list-1} is $0.05 + 0.10 + 2 * 0.01 = 0.17$.
-
-\section{Bounds}\label{sec:bounds}
-For a set of $n$ rules, there are $n!$ possible rule lists.
-Finding the optimal rule list using a brute force approach is infeasible for any problem of reasonable size.
-Our algorithm uses the discrete optimization technique of branch-and-bound to solve the combinatorially difficult problem of finding an optimal rule list.
-This requires tight bounds that allow us to prune as much of the search space as possible.
-These bounds are formalized and proved in Angelino et al. \cite{AngelinoLaAlSeRu17} and are reproduced in Appendix A.
-For clarity we present informal summaries of the important bounds here.
-
-\subsection{Lower Bound}
-We use the term \textit{lower bound} to mean the best possible outcome for the objective function for a given prefix.
-We do this by calculating the loss of the prefix and assuming that any points not captured by the prefix will be predicted correctly.
-This is equivalent to assuming that the default rule captures all points perfectly.
-Because any future extensions of the prefix can never do better than this perfect default rule, we will be able to use it to prune our exploration.
-An important property of the lower bound is that it increases monotonically.
-
-\subsection{Hierarchical Objective Bound}
-The main bound for our algorithm is the \textit{hierarchical objective bound}. 
-It says that we do not need to pursue a rule list if it has a lower bound that is worse than the best objective we have already seen.
-This follows from the fact that lower bounds increase monotonically, so if the lower bound of rule list A is worse than the objective of rule list B, any extensions of rule list A can never be better than rule list B.
-This allows us to prune large parts of the search space by not pursuing rule lists that could never be better than something we've already seen.
-
-\begin{figure}
-\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-tree.png}
-\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-tree-pruned.png}
-\caption[Objective bound]{This tree shows the hierarchical objective bound in action. Our best objective seen is the prefix (blue, gray) with an objective of $0.10$. Any prefixes with lower bound greater than this objective--(gray), (red, green), (green, gray) can be pruned and not ever examined.
-\label{fig:objective-bound}}
-\end{figure}
-
-\subsection{Permutation Bound}
-
-As defined above, every sample is captured by precisely one rule--any sample that is caught by rule A in the rule list AB cannot be caught by rule B. 
-Now consider a \textit{permutation} of the rule list AB: the rule list BA.
-Any samples that are captured by either rule A or B but not both will be captured identically in both rule lists.
-Samples that are captured by both rules will again be captured the same in both rule lists, though they may be predicted differently in the two rule lists.
-Thus, regardless of the order in which the rules appear, rule lists AB and BA will capture exactly the same set of data.
-They will differ only in which rules capture which samples, so their accuracy may differ. 
-We can use this knowledge to create a bound as follows.
-If we know that the lower bound of AB is better than the lower bound of BA, we can eliminate from consideration all rule lists beginning with BA.
-This is due to the fact that any corresponding rule list beginning with AB will capture exactly the same samples as the equivalent rule list beginning with BA but will have a better objective score.
-Generalizing, we can eliminate all but one permutation of a given set of rules using this principle.
-
-\begin{figure}
-\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-permutations.png}
-\includegraphics[width=0.9\textwidth]{figs/branch-and-bound-permutations-pruned.png}
-\caption[Permutation bound]{This tree shows the use of the permutation bound. Prefixes (blue, green) and (green, blue) are permutations of each other, so their lower bounds can be compared. The prefix (green, blue) has a better lower bound, so (blue, green) can be pruned and none of its children have to be examined.
-\label{fig:permutation-bound}}
-\end{figure}
-
-\subsection{Support Bounds}
-Due to our regularization term in calculating our objective function, adding a rule that does little to help our accuracy will actually be harmful to the overall objective score.
-This allows us to place bounds that rely on the \textit{support} of the rules we add.
-It never makes sense to add a rule that increases the objective function, so we only consider adding rules that capture enough points correctly to overcome the regularization penalty.
-By definition, rules that don't capture enough of the remaining points cannot capture them correctly, so this provides us with two closely related bounds.
-As our rule lists get longer many rules do not capture enough points that haven't already been captured and this bound begins to play an even larger role.
-
-\subsection{Equivalent Points Bound}
-This bound relies on the structure of our dataset.
-In our dataset, we may encounter two data points that have the same features but different labels.
-We call the set of these data points \textit{equivalence points}, and describe the label that occurs less often as the \textit{minority} label.
-Any rule that classifies one point in an equivalence class will also classify all other points in that class.
-However, it is impossible to correctly predict equivalence points with different labels using a single rule.
-So, for a given class of equivalence points, we know that we will mispredict all of the points with a minority label.
-We can thus update our lower bound to be tighter than just assuming that the default rule will capture all remaining points correctly.
-Now, we assume all remaining points will be captured incorrectly if it is an equivalent point with a minority label.
-This gives us much tighter lower bounds and in practice allows us to prune much more efficiently.
-
-\section{Curiosity}
-There are a number of different ways to explore the search space (see \ref{sec:queue}).
-Some methods, such as BFS, prioritize exploration---looking at all rule lists of a given length before proceeding to the next length.
-Others, such as a priority queue ordered by lower bound, focus on purely exploiting the best prefixes that we've seen.
-We define a new metric, \textit{curiosity}, that blends together both exploration and exploitation.
-Curiosity is a function of both the lower bound and the number of samples captured.
-This prioritizes rule lists that still have many samples left to capture (exploration) while also pursuing rule lists with promising lower bounds (exploitation).
-
-\begin{math}
-curiosity(RL) = (lowerBound(RL) - c * (len(RL) - 1))  * (nsamples / |captured(RL)|)
-\end{math}
-
-\section{Remaining Search Space}
-One metric for tracking the efficacy of our optimizations will be seeing how quickly we reduce the remaining search space.
-We start with a combinatorially large search space, but quickly prune it down using our bounds.
-We calculate the remaining search space is by looking at all of the potential prefixes in our  queue and seeing how much each prefix could potentially be expanded.
-Due to our regularization term, we are able to bound the maximum length of a prefix as our best objective gets updated.
-This upper bound on the maximum length of a viable prefix allows us to place an upper bound on the search space as well.
-We find that the remaining search space decreases rapidly at the beginning of execution, then slowly decreases until the very end of execution when it again rapidly decreases.
+In the $1980$s and $90$s, soon after the release of Valiant's theory of learnability \cite{Valiant84} and Rivest's development of decision lists \cite{Rivest87}, there were a host of papers concerned with bounding the efficiency of learning boolean functions (which are equivalent to decision lists).
+Blum \cite{Blum90}
+\cite{DhagatHe94}
