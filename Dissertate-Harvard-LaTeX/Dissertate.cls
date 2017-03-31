@@ -297,7 +297,7 @@
     \clearpage  
     \begin{spacing}{\dcompressedspacing}
         \bibliography{references}
-        \addcontentsline{toc}{chapter}{References}
+        %\addcontentsline{toc}{chapter}{References}
         \bibliographystyle{apalike2}
         %\include{endmatter/colophon}
     \end{spacing}
@@ -318,6 +318,8 @@
 \usepackage{fullwidth}
 %\usepackage{graphicx,verbatim}
 \usepackage{listings}
+\usepackage{tabularx}
+\usepackage{chngpage}
 \usepackage{subcaption}
 \captionsetup{compatibility=false}
 \DeclareCaptionSubType*{algorithm}

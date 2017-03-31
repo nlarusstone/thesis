@@ -28,14 +28,14 @@ Both algorithms grow the initial tree greedily.
 However, this leads to extremely large trees, so they perform a post-processing step of pruning to avoid overfitting and maintain interpretability.
 
 The problem of constructing the optimal binary decision tree has been shown to be NP-Complete \cite{HyafilRi76}, where optimal means the fewest number of nodes.
-So, while most decision trees are constructed greedily, and thus sub-optimally, there has been some work on constructing optimal decision trees \cite{Moret82}.
+So, while most decision trees are constructed greedily, and thus provide no guarantees on optimality, there has been some work on constructing optimal decision trees \cite{Moret82}.
 There has even been the use of a branch and bound technique in an attempt to construct more optimal decision trees.
 Garofalakis et al. introduce an algorithm to generate more interpretable decision trees by allowing constraints to be placed on the size of the decision tree \cite{GarofalakisHyRaSh00}.
 They use the branch and bound technique to constrain the size of the search space and limit the eventual size of the decision tree.
 During tree construction, they bound the possible Minimum Description Length (MDL) cost of every different split at a given node.
 If every split at that node leads to a more expensive tree than the MDL cost of the current subtree, then that node can be pruned.
 In this way, they were able to prune the tree while constructing it instead of just constructing the tree and then pruning at the end.
-However, even with the added bounds, this approach did not yield globally optimal decision trees, because they constrained the number of nodes in the tree.
+However, even with the added bounds, this approach does not guarantee globally optimal decision trees, because they constrain the number of nodes in the tree.
 
 Whereas decision trees are always grown from the top downwards, decision lists are built while considering the entire pool of rules.
 Thus, while decision trees are often unable to achieve optimal performance even on simple tasks such as determining the winner of a tic-tac-toe game, decision lists can achieve globally optimal performance.
@@ -43,19 +43,21 @@ Decision lists are a generalization of decision trees since any decision tree ca
 Thus, decision list algorithms are a direct competitor to the popular interpretable methods detailed above: CART and C$4.5$.
 Indeed, decision list algorithms are being used for a number of real world applications including stroke prediction \cite{LethamRuMcMa15}, suggesting medical treatments \cite{ZhangLaTsDa2015}, and text classification \cite{LiYa02}.
 
-Work in the field of decision lists focuses both on the generation of new theoretical bounds and the improvement of predictive accuracy of models.
-Recent work on improving accuracy has led to the creation of probabilistic decision lists that generate a posterior distribution over the space of potential decision lists \cite{LethamRuMcMa15,YangRuSe16}.
+Work in the field of decision lists focuses both on the generation of new theoretical bounds and new algorithms to generate rule lists.
+Both approaches share the end goal of improving the predictive accuracy of models using rule lists.
+Recent work on improving accuracy has led to the creation of probabilistic decision lists that generate a distribution over the space of potential decision lists \cite{LethamRuMcMa15,YangRuSe16}.
 These methods achieve good accuracy while maintaining a small execution time.
 In addition, these methods improve on existing methods, such as CART or C4.5, by optimizing over the global space of decision lists as opposed to searching for rules greedily and getting stuck at local optima.
 Letham et al. are able to do this by pre-mining rules, which reduces the search space from every possible split of the data to a discrete number of rules.
-We take the same approach towards optimizing over the global search space, though we don’t use probabilistic techniques.
+Rule mining generates rules by creating boolean clauses that represent common features in the dataset.
+We take the same approach towards optimizing over the global search space, though we don’t use probabilistic techniques because we want a guarantee on the optimality of our solution.
 We also want to work in a regime with a discrete number of rules, thus we use the same rule mining framework from Letham et al. to generate the rules for our data sets \cite{LethamRuMcMa15}.
 This framework creates features from the raw binary data and then builds rules out of those features.
-Yang et al. builds on this earlier work by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
+Yang et al. builds on Letham et al., improving runtime and accuracy, by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
 We use that bit vector manipulation library to help perform computations involving calculating accuracy of rules \cite{YangRuSe16}.
 
-%TODO: Complete paragraph about discrete optimization/bounds in 90s
-Rivest's introduction of decision lists \cite{Rivest87} was soon after Valiant's theory of learnability \cite{Valiant84}.
+In addition to these recent practical improvements in rule list generation, there has been a wide body of literature on the theoretical aspects of rule lists.
+Rivest introduced decision lists \cite{Rivest87} soon after Valiant published his theory of learnability \cite{Valiant84}.
 %, Rivest introduced decision lists and showed that they were efficiently learnable in a finite attribute space \cite{Rivest87}.
 Much of the work in the years immediately following the invention of decision lists were focused on issues of learnability and complexity rather than practical implementations.
 Some of this work has focused on the attribute efficiency of various algorithms \cite{Blum92, DhagatHe94}, while others have focused on the relationship between decision lists and classes of boolean functions such as DNF or CNF \cite{Rivest87, EiterIbMa02}.
@@ -67,20 +69,21 @@ Some of this work has focused on the attribute efficiency of various algorithms 
 Other authors focused on a specific case of decision lists such as homogenous decision lists \cite{SegalOr94} or a more general cases of the decision list problem such as decision committees \cite{NockGa95}.
 %Nock and Gascuel show that learning decision committees includes k-DL and that learning the most parsimonious, but consistent decision committee is NP-Hard \cite{NockGa95}.
 %soon after the release of Valiant's theory of learnability \cite{Valiant84}, papers about learning decision lists were primarily concerned with bounding the complexity of such algorithms.
-Throughout the past 3 decades, the main thrust of the research has been to improve the complexity of both the number of examples and the runtime of their algorithms \cite{KlivansSe06}.
+Much of the research into rule lists has improved the complexity of both the number of training examples necessary and the worst case runtime of rule list algorithms \cite{KlivansSe06}.
 %Klivans and Servedio improve bounds of both example complexity and runtime when learning of rule lists \cite{KlivansSe06}.
-However, most of these techniques are focused on finding an approximately correct solution.
-Despite discussing that the class of problems surrounding learning decision lists was NP-Hard, there seems to be no work on trying to solve the optimality problem.
-We hypothesize that hardware limitations played a large part in the lack of development of discrete optimization techniques with regards to the problem of decision lists.
+Despite discussing that the difficulty surrounding learning accurate decision lists, there has been little work trying to solve the optimality problem.
+Due to the intrinsic computational difficulty fo the problem, researchers have not applied discrete optimization techniques with regards to the problem of decision lists.
+We hypothesize that hardware limitations severely constrained the size of the problems that could be solved using these techniques, contributing to this gap in the literature.
 %due to the infeasibility of solving problems of a reasonable size using discrete optimization techniques on a pre-modern computer.
 %http://www.mli.gmu.edu/papers/91-95/91-28.pdf - MOnks
 
 Branch and bound was a technique originally developed to solve linear programming problems \cite{LandDo60}.
 The branch and bound algorithm recursively splits the data into subgroups, yielding a tree-like structure.
-Then, by calculating a value corresponding to the end goal of the algorithm (e.g., accuracy), some branches of the tree can be proved to be worse in every case than another branch and therefore can be pruned, reducing the search space.
+Using a value corresponding to the end goal of the algorithm, the algorithm can guarantee that some branches of the tree will be worse in every case than another branch and therefore can be pruned.
+By repeating these two steps of branching and bounding, the algorithm quickly reduces the search space.
 For decades, it has been used to great effect in the realm of mixed integer programming \cite{LinderothSa99}.
 It has also been applied to other NP-hard problems such as the Traveling Salesman Problem \cite{LittleMuSwKa63} and the Knapsack Problem \cite{Kolesar67}.
 More recently, it has been applied to machine learning problems such as feature subset selection \cite{NarendraFu77} and clustering \cite{NarendraFu75}.
-However, over the past few decades, its popularity has declined in favor of convex optimization methods such as neural nets.
-Researchers found other ways to achieve high accuracy for their predictive models by using large datasets that would take too long for branch and bound to complete.
-However, the continual improvements in computer hardware has led to a recent resurgence in the use of branch and bound techniques \cite{BertsimasKiMa16}.
+However, over the past few decades, its popularity has declined in favor of convex optimization methods such as SVMs.
+These optimization methods have allowed researchers to achieve high accuracy on large datasets without running into the computational difficulties of branch and bound.
+However, the continual improvements in computer hardware have led to a recent resurgence in the use of branch and bound techniques \cite{BertsimasKiMa16}.

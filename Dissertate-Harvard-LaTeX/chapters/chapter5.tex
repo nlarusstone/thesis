@@ -12,10 +12,12 @@ Next, we examine the improvements made to our symmetry-aware map to reduce the m
 Finally, we describe a parallel implementation and some of the issues that complicate a parallel implementation.
 
 \begin{figure}
+\vspace{-2cm}
 \begin{center}
 \begin{minipage}{\textwidth}
 \includegraphics[width=0.8\textwidth]{figs/compas_accuracy.png}
 \includegraphics[width=0.8\textwidth]{figs/weapon_accuracy.png}
+\vspace{-1cm}
 \caption{10-fold cross validation of various machine learning models on the COMPAS and Weapon datasets.
 CORELS performs as well as or better than equivalent interpretable and black-box models.
 Method type from left to right: Logistic Regression, Support Vector Machine, Boosted Decision Tree, Decision Tree, Decision Tree, Random Forest, (Rule Set), Rule List, Rule List}
@@ -33,82 +35,166 @@ We see that CORELS performs slightly better than other rule based methods such a
 In addition, we see no increase in accuracy granted by using a non-interpretable method instead of an interpretable method such as CORELS.
 This provides evidence against the claim that predictive accuracy on these problems will suffer if an interpretable algorithm is used.
 
-%TODO determine best figures to put in here, run on multiple datasets, more in depth description of the figures
-\section{Ablation--how much does each bound/optimization help?}
-We wished to determine how much each theoretical bound and data structure optimization helped, so that we could determine which ones were the most helpful.
-In addition, we wanted to find out how much of an overall speed-up our work has given us.
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State \textbf{Optimal COMPAS rule list}
+\State \bif $(age=23\text{--}25) \wedge (priors=2\text{--}3)$ \bthen $yes$
+\State \belif $(age=18\text{--}20)$ \bthen $yes$
+\State \belif $(sex=male) \wedge (age=21\text{--}22)$ \bthen $yes$
+\State \belif $(priors > 3)$ \bthen $yes$
+\State \belse $no$\\
+
+\State \textbf{Optimal Weapon rule list}
+\State \bif $stop\text{ }reason=suspicious\text{ }object$ \bthen $yes$
+\State \belif $location=transit\text{ }authority$ \bthen $yes$
+\State \belif $stop\text{ }reason=suspicious\text{ }bulge$ \bthen $yes$
+\State \belse $no$
+\end{algorithmic}
+%\vspace{-3mm}
+\caption{Above: The optimal rule list that predicts two-year recidivism for a fold of the COMPAS dataset, found by CORELS.
+Below: The optimal rule list that predicts whether or not someone who is stopped by the NYPD has a weapon for one fold of the Stop and Frisk dataset, found by CORELS.}
+\label{fig:rule-list-optimal}
+\end{figure}
+
+%TODO add sentence about how previous crimes could be racially biased because of criminal justice system
+Fig \ref{fig:rule-list-optimal} shows that neither the optimal rule list for COMPAS nor the one for Weapon includes a race related rule.
+Both datasets were mined for rules pertaining to race, which means that those rules were not predictive enough to be in the optimal rule list.
+This shows that it is possible to get models with state of the art accuracy that do not rely on race to make their predictions.
+Thus, the excuse that using a racially biased model is more predictive does not hold true.
+These rule lists are short and accurate and therefore would be useful as a racially unbiased heuristic aid for judges and police officers.
+
+\section{Isolated Component Analysis}
+We wished to determine how helpful each theoretical bound and data structure optimization was.
 We ran a number of experiments where we took out a single component from our system and measured the effects on the runtime and memory usage of our algorithm.
 We find that the equivalent points bound is our most important optimization for running in a reasonable amount of time.
 Each other optimization and bound plays an important, but not crucial, role in the speed of our algorithm.
 
+In addition, we wanted to find out how much of an overall speed-up CORELS gave compared to a naive implementation.
 On the COMPAS dataset, where $n = 155$, naively evaluating all prefixes of up to length 5 would require examining 84,382,025,575 different prefixes.
-However, with our solution, we examine only 99,891,878 prefixes in total.
-This is a reduction of 845x.
+However, with our solution, we examine only 99,891,878 prefixes in total---a reduction of 845x.
 Note that this is a lower bound on the reduction since any brute force solution would have to examine prefixes of longer than length 5 to certify optimality.
 It takes us about 2$\mu$s to evaluate a single prefix.
 Thus, a naive solution would take 168,764s---about 2 days---while CORELS takes only 2 minutes.
-While the naive solution will take a long time but eventually complete in this case, it is clear that brute force wouldn't scale to larger problems.
+While the naive solution will eventually complete for this dataset, it is clear that brute force wouldn't scale to larger problems.
 
 However, if we look at how processor speeds have changed over the last 25 years, we can see that computers are about 1,000,000 faster now than they were in 1993. \cite{Supercomputer}
-So, even with our algorithmic and data structural improvements, CORELS would have taken over 120,000,000s in 1993---an unreasonable amount of time.
-This explains why there has been a dearth of work on algorithms focused on optimality in the past.
-When we combine our algorithmic improvements with the increased processor speeds, though, we see that our algorithm runs almost 1 billion times faster than a naive implementation would have in 1993.
+Even with our algorithmic and data structural improvements, CORELS would have taken over 120,000,000s in 1993---an unreasonable amount of time.
+Our advances are only meaningful because we can run them on a modern system.
+When we combine our algorithmic improvements with the increased processor speeds,we see that our algorithm runs almost 1 billion times faster than a naive implementation would have in 1993.
 %Nov 2016 125,435.9 TFlops/s
 %June 1993 131.0 GFlops/s
-
-\subsection{Full CORELS system}
-
-Our baseline system with all of our improvements is the CORELS system.
-Running the full CORELS system on the COMPAS dataset yields the optimal solution and its certificate within 121s.
-The maximum memory usage is 150MB, with the majority of that coming from our prefix trie.
 
 \begin{figure}
 \begin{center}
 \begin{minipage}{\textwidth}
 \includegraphics[width=0.9\textwidth]{figs/corels_mem.png}
 \includegraphics[width=0.9\textwidth]{figs/corels_size.png}
-\caption{Memory usage of full CORELS system. 
+\caption{Memory usage of full CORELS system on the COMPAS dataset. 
 Our prefix tree accounts for the bulk of the memory usage.
 The size (in number of items) of each of our main data structures.
-Corresponds to the amount of memory used, as shown above.}
+Corresponds to the amount of memory used.}
 \end{minipage}
 \end{center}
 \label{fig:corels-mem}
 \end{figure}
 
-With about 1 million items active at the peak, this comes out to about 150 bytes per item.
-This includes copies of that item that are kept across the prefix trie, symmetry-aware map, and queue.
+\subsection{Full CORELS system}
 
-\begin{comment}
-\begin{figure}[t!]
+Our baseline system with all of our improvements is the CORELS system.
+Running the full CORELS system on the Weapon dataset yields the optimal solution and certificate within 142s.
+COMPAS is slightly faster, allowing us to discover and certify optimality within 124s.
+Fig \ref{fig:corels-mem} shows the growth of our data structures and memory usage throughout the execution of our algorithm.
+The maximum memory usage is 170MB, with the majority of that coming from our prefix trie.
+With about 1 million items active at the peak, this comes out to about 170 bytes per item.
+This includes copies of that item that are kept across the prefix trie, symmetry-aware map, and queue.
+For a modern machine, this is not very much memory, demonstrating further that our algorithm can be run without undue memory pressure.
+
+We also run CORELS on the Weapon dataset, which has fewer rules but many more individuals.
+This will cause optimizations that limit the depth of our search---the equivalent points bound, the lookahead bound---to be less important than ones that allow us to prune more aggressively---the priority queue and symmetry-aware map.
+This section demonstrates that while individual optimizations may play a larger role in certain datasets, the entirety of the system allows for speedy computation and certification of the optimal solution.
+
+\begin{figure}
 \begin{center}
-\includegraphics[width=0.9\textwidth]{figs/corels_prefixes.png}
+\includegraphics[width=1.1\textwidth]{figs/compas_prefixes.png}
 \end{center}
-\caption{Tracks the number of prefixes of a given length active in the queue for the full CORELS system}
-\label{fig:corels-prefixes}
+\caption{Tracks the number of prefixes of a given length active in the queue for our system when running on the COMPAS dataset.
+Each graph represents an experiment run without one of our bounds or data structures.
+This allows us to isolate the critical improvement(s) for a given class of problem.
+The equivalent points bound is especially important for datasets with a large number of rules and relatively few data points.
+}
+\label{fig:compas-prefixes}
 \end{figure}
-\end{comment}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=1.1\textwidth]{figs/weapon_prefixes.png}
+\end{center}
+\caption{Tracks the number of prefixes of a given length active in the queue for our system when running on the Weapon dataset.
+Each graph represents an experiment run without one of our bounds or data structures.
+This allows us to isolate the critical improvement(s) for a given class of problem.
+The symmetry-aware map and permutation bound are especially important for datasets with few rules but a lot of data points.
+}
+\label{fig:weapon-prefixes}
+\end{figure}
 
 \subsection{Priority Queue} \label{exp:priority}
 
 One of our first optimizations was the use of a priority queue to utilize different exploration techniques. 
-Removing the priority queue and simply using BFS allows us to find the optimal solution and certificate in 142s.
-So, the queue gives us a slight speed-up without requiring much memory at all.
-On other problems, we've found that using a priority queue can lead to a large speed-up.
+On the COMPAS dataset, using BFS instead of a priority queue does not seem to harm our performance at all, 
+Removing the priority queue from the Weapon dataset, however, and simply using BFS slows down our performance by a factor of 2.
+The queue requires very little memory and can give us a significant speed-up on certain types of problems.
 
 \subsection{Support Bounds}
 
 The support bounds are intrinsic to the rules and are the first bounds we check in our execution, because they are the simplest to compute.
-This ease of computation belies the fact that these bounds prevent the pursuit of useless rules.
-Without these bounds we complete the certification in 261s.
+Despite this ease of computation, these bounds prevent the pursuit of useless rules.
+Without these bounds we complete the certification in 229s (1.8x) for COMPAS and 153s (1.08x) for Weapon.
+So, these bounds are not crucial for the completion of our algorithm, but they do provide a nice speed-up.
+
+\begin{table}[t!]
+\begin{adjustwidth}{-.4in}{-.4in}
+\begin{tabular}{l | c | c | c | c | c | c} 
+  Removed component & $t_\text{total}$ (s) & $t_\text{opt}$ (s) & $i_\text{total}$ ($\times 10^6$) & $Q_\text{max}$ ($\times 10^6$) & $K_\text{max}$ & $t/t_\text{CORELS}$ \\
+\hline
+none (CORELS) & 142 & 0.002 & 1.15 & 0.67 & 13 & 1 \\
+priority queue (BFS) & 297 & 0.012 & 2.40 & 0.68 & 13 & 2.09\\
+support bounds & 153 & 0.003 & 1.21 & 0.69 & 13 & 1.08 \\
+symmetry-aware map & $>$ 6400 & $>$0.002 & $>$114 & $\ge$108 & $\ge$ 10 & $>$45\\
+lookahead bound & 186 & 0.004 & 1.56 & 0.9 & 13 & 1.31\\
+%equiv. pts. bound & 188.6 (104.6) & 6178 (1840) & 803.8 (0.1) & 790.5 (0.4) & 10-10
+equivalent pts bound & 443 & 0.002 & 4.85 & 2.7 & 16 & 3.32
+\end{tabular}
+\vspace{3mm}
+\caption{Per-component performance improvement.
+%
+The columns report total execution time,
+time to optimum, number of queue insertions,
+maximum queue size, and maximum evaluated prefix length.
+%
+The first row shows CORELS; subsequent rows show variants
+that each remove a specific implementation optimization or bound.
+%
+(We are not measuring the cumulative effects of removing a sequence of components.)
+%
+All rows represent complete executions, except for the symmetry-aware map row,
+in which each execution was terminated due to memory constraints
+}
+\end{adjustwidth}
+\label{tab:weapon}
+\end{table}
 
 \subsection{Symmetry-aware map}
 \label{exp:ablation-pmap}
 The symmetry-aware map is a novel way of approaching branch-and-bound, and it plays a large role in our elimination of search space.
 Using the symmetry-aware map means that we are able to pursue only one prefix out of all of its permutations.
-As our prefixes grow to length 4 and beyond, that means we can eliminate at least 23 prefixes.
-This is an important optimization and removing it takes a long time to complete the certification---1147s.
+As our prefixes grow to length 4, for example, that means we can eliminate at least 23 additional prefixes.
+For a problem like COMPAS, where we typically examine prefixes up to length 5 (we examine prefixes of length 5 even though Fig \ref{fig:compas-prefixes} only shows prefixes up to length 4 being placed in the queue), this can be a very important bound.
+However, we can see the true importance of the symmetry-aware map on the Weapon dataset in Table \ref{tab:weapon} where we are unable to even finish the problem without the symmetry-aware map.
+This problem requires us to look at rule lists of length 10 or more, so the permutation bound helps eliminate millions of prefixes.
 
+\begin{comment}
 \begin{figure}[t!]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{figs/pmap_prefixes.png}
@@ -116,14 +202,17 @@ This is an important optimization and removing it takes a long time to complete 
 \caption{Tracks the number of prefixes of a given length active in the queue for CORELS without a symmetry-aware map}
 \label{fig:pmap-prefixes}
 \end{figure}
+\end{comment}
 
 \subsection{Lookahead Bound}
-
 Our lookahead bound is useful for preventing us from examining longer prefixes than we need to.
-From running our full CORELS system, we know that our optimal rule list is of length 4.
-With our lookahead bound, we never have to examine prefixes of length 5.
-However, removing that bound means that we do look at many prefixes of length 5, which drastically slows our computation to 2360s.
+From running our full CORELS system on COMPAS, we know that our optimal rule list is of length 4.
+With our lookahead bound, we never have to place prefixes of length 5 into our queue.
+However, removing that bound means that we do place prefixes of length 5 into our queue and therefore have to examine prefixes of length 6.
+This drastically slows our computation to 1646s, a 13x slowdown over our full CORELS system.
+However, this bound is much less important on the Weapon dataset where we are already examining long rule lists.
 
+\begin{comment}
 \begin{figure}[t!]
 \begin{center}
 \includegraphics[width=0.9\textwidth]{figs/lookahead_prefixes.png}
@@ -131,36 +220,23 @@ However, removing that bound means that we do look at many prefixes of length 5,
 \caption{Tracks the number of prefixes of a given length active in the queue without our lookahead bound}
 \label{fig:lookahead-prefixes}
 \end{figure}
+\end{comment}
 
-\subsection{Equivalent points bound}
-
-The equivalent points bound is our optimization that provides the largest benefit.
-Since all of our other bounds eliminate prefixes contingent on the lower bound, the equivalent points bound is important because it tightens the lower bound.
-Removing this bound makes it impractical to complete real world problems.
-We stop execution after multiple hours (8500 s) and show that there is still a large portion of the search space to be explored.
-
-\begin{figure}[t!]
-\begin{center}
-\includegraphics[width=0.9\textwidth]{figs/equivalent_prefixes.png}
-\end{center}
-\caption{Tracks the number of prefixes of a given length active in the queue without the equivalent points bound}
-\label{fig:equivalent-prefixes}
-\end{figure}
-
-%TODO: Re-run BFS because numbers seem wrong, add t/t_corels field
+%\makebox[1.2\textwidth][c]{
 \begin{table}[t!]
+\begin{adjustwidth}{-.4in}{-.4in}
 \begin{tabular}{l | c | c | c | c | c | c} 
   Removed component & $t_\text{total}$ (s) & $t_\text{opt}$ (s) & $i_\text{total}$ ($\times 10^6$) & $Q_\text{max}$ ($\times 10^6$) & $K_\text{max}$ & $t/t_\text{CORELS}$ \\
 \hline
-none (CORELS) & 121 & 7.3 & 0.83 & 0.59 & 4 & 1 \\
-priority queue (BFS) & 142 & 0.14 & 0.73 & 0.19 & 5 \\
-support bounds & 261 & 11 & 1.3 & 0.98 & 4 \\
-symmetry-aware map & 1147 & 23 & 6.5 & 5.6 & 4 \\
-lookahead bound & 2360 & 7.6 & 7.6 & 10.7 & 5 \\
+none (CORELS) & 124 & 5.6 & 0.84 & 0.59 & 4 & 1.0 \\
+priority queue (BFS) & 121 & 4.22 & 0.99 & 0.50 & 4 & 0.98 \\
+support bounds & 229 & 9.1 & 1.3 & 0.98 & 4 & 1.8 \\
+symmetry-aware map & 1118 & 15 & 6.5 & 5.6 & 4 & 9.0\\
+lookahead bound & 1646 & 6.2 & 7.6 & 6.9 & 5 & 13 \\
 %equiv. pts. bound & 188.6 (104.6) & 6178 (1840) & 803.8 (0.1) & 790.5 (0.4) & 10-10
-equivalent pts bound & $>$8500 & $>$42 & $>$29 & $>$28 & $\ge$7
+equivalent pts bound & $>$8780 & $>$21 & $>$50 & $>$50 & $\ge$8 & $>$ 71
 \end{tabular}
-\vspace{4mm}
+\vspace{3mm}
 \caption{Per-component performance improvement.
 %
 The columns report total execution time,
@@ -175,8 +251,28 @@ that each remove a specific implementation optimization or bound.
 All rows represent complete executions, except for the final row,
 in which each execution was terminated due to memory constraints
 }
-\label{tab:ablation}
+\end{adjustwidth}
+\label{tab:compas}
 \end{table}
+%}
+
+\subsection{Equivalent points bound}
+
+The equivalent points bound is our optimization that provides the largest benefit when we have a large number of rules.
+Since all of our other bounds eliminate prefixes contingent on the lower bound, the equivalent points bound is important because it tightens the lower bound.
+Removing this bound typically makes it impractical to complete real world problems.
+For COMPAS Table \ref{tab:compas} demonstrates that even after halting execution after multiple hours (8780s), there is still a large portion of the search space to be explored.
+This bound plays less of a role for the Weapon dataset, but still remains an important optimization.
+
+\begin{comment}
+\begin{figure}[t!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{figs/equivalent_prefixes.png}
+\end{center}
+\caption{Tracks the number of prefixes of a given length active in the queue without the equivalent points bound}
+\label{fig:equivalent-prefixes}
+\end{figure}
+\end{comment}
 
 \section{Symmetry-aware Map Optimization}
 As one of our two main data structures, the memory usage of our symmetry-aware map is something that was very important to us.
@@ -283,9 +379,9 @@ We see that CapturedKeys provide minimal space savings over PrefixKeys due to th
 	\end{center}
 \label{fig:prefix-captured}
 \end{figure}
+
 Indeed, in Fig \ref{fig:prefix-captured}, we find that this occurs in only a few cases, so the size of the map is mostly consistent across different key types.
 As can be seen, CapturedKeys are much more memory intensive than PrefixKeys because they're storing all of the data points instead of just a few rules, so we used PrefixKeys for our later analyses.
-
 
 %TODO add icache statistics and provide #'s for performance deltas
 \section{Templates vs Inheritance}
@@ -304,6 +400,15 @@ A vtable, or virtual method table, is how C++ deals with the fact that the compi
 With a pure inheritance framework, our executable was 171,288 bytes.
 However, even with the inheritance framework, the runtime of our algorithm was not significantly different from the template runtime.
 Thus, since inheritance provided a much cleaner code base to work with, we decided to switch to an inheritance based framework.
+
+\begin{figure}[t!]
+	\begin{center}
+	\includegraphics[width=\textwidth]{figs/parallel_speedup.png}
+	\caption{This graph shows the speedup of our parallel implementation as we add more threads. 
+We see a sub-linear speedup, likely due to cache misses.}
+	\end{center}
+\label{fig:parallel}
+\end{figure}
 
 %TODO Add parallelization graph and finish writing
 \section{Parallelization}
@@ -331,6 +436,7 @@ For the symmetry-aware map, we lock on insertions and lookups because insertions
 Deletion and garbage collection is handled by the master thread as well.
 
 %TODO find bottleneck and explain
-We find a linear speed up when moving from 1 to 2 threads, but diminishing returns as we increase the number of threads.
+Fig \ref{fig:parallel} shows that parallelizing our implementation did lead to a speed-up, but we see diminishing returns as we increase the number of threads.
 One theory we had was that since we had to add locking to the symmetry-aware map, there might be contention that is slowing down the multi-threaded implementation.
 However, when we preallocate a large symmetry-aware map and don't lock, we see the same type of slowdown, implying that contention is not the issue.
+An alternative explanation is that increasing the number of threads leads to cache thrashing because the appropriate parts of the tree can no longer be kept in memory.

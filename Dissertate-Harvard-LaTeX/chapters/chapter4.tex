@@ -134,7 +134,6 @@ Despite supporting only one bound, the permutation map plays a significant role 
 \end{algorithmic}
 \end{algorithm}
 
-%TODO check spacing
 \begin{figure}[!ht]
 \centerline{
   \begin{minipage}{1.2\linewidth}
@@ -163,7 +162,7 @@ symmetry-aware map~$P$
 	\If {$corr < t$} \Comment{Minimum correct support bound}
 		\State continue
 	\EndIf
-  \State \parbox[t]{.45\linewidth}{$lb = parent.\text{bound(\,)} - parent.\text{minority(\,)} +  \hspace{\algorithmicindent} \dfrac{|cap| - corr}{nsamples} + c$} \Comment{\parbox[t]{.45\linewidth}{Lower bound is equal to parent's lower bound plus the number of mistakes made by the new rule.}}
+  \State \parbox[t]{.45\linewidth}{$lb = parent.\text{bound(\,)} - parent.\text{minority(\,)} +  \hspace{5cm} \dfrac{|cap| - corr}{nsamples} + c$} \Comment{\parbox[t]{.45\linewidth}{Lower bound is equal to parent's lower bound plus the number of mistakes made by the new rule.}}
   %\State \hspace{\algorithmicindent} $+ \dfrac{|cap| - corr}{nsamples} + c$
 	\If {$lb  >= T.$minObjective(\,)} \Comment{Objective bound}
 		\State continue

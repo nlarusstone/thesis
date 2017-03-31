@@ -64,7 +64,8 @@ Rule 1, has a support of $5$ but only classifies $4$ of those samples correctly-
 \State \belse $PC$
 
 \begin{raggedleft}
-\includegraphics[width=0.7\textwidth]{figs/rule_list_1_cap.png}\\
+\vspace{1mm}
+\includegraphics[width=0.7\textwidth]{figs/rule_list_1_cap.png}
 \end{raggedleft}
 \State \textbf{Rule List 2}
 \State \bif $\neg (residence=california)$ \bthen $PC$\,
@@ -77,10 +78,10 @@ Rule 1, has a support of $5$ but only classifies $4$ of those samples correctly-
 
 \end{algorithmic}
 %\vspace{-3mm}
-\caption{Example rule lists from the Computer dataset made using rule 1, rule 4, and a default rule.
+\caption{Example rule lists from the Computer dataset made using Rule 1, Rule 4, and a default rule.
 As in Fig \ref{fig:rules}, black boxes represent data points captured by the rules in the rule list and red marks incorrect classification.
 All of the white boxes are classified by the default rule.
-Rule 4 has an accuracy of 50\% in Rule List 2, but an accuracy of 100\% in Rule List 1 when it comes after rule 1.
+Rule 4 has an accuracy of 50\% in Rule List 2, but an accuracy of 100\% in Rule List 1 when it comes after Rule 1.
 So, even though the two rule lists are permutations of each other, Rule List 1 performs much better than Rule List 2.}
 \label{fig:rule-list-computer}
 \end{figure}
@@ -241,21 +242,6 @@ All of our datasets are split into a training set and a test dataset to test for
 We then divide the training and test sets into 10 folds for cross validation.
 For our analysis that does not involve accuracy calculations, we choose a single fold on which to run and get our performance numbers.
 
-\begin{figure}[t!]
-%\vspace{-3mm}
-\begin{algorithmic}
-\normalsize
-\State \bif $(age=23\text{--}25) \wedge (priors=2text{--}3)$ \bthen $yes$
-\State \belif $(age=18text{--}20)$ \bthen $yes$
-\State \belif $(sex=male) \wedge (age=21text{--}22)$ \bthen $yes$
-\State \belif $(priors > 3)$ \bthen $yes$
-\State \belse $no$
-\end{algorithmic}
-%\vspace{-3mm}
-\caption{The optimal rule list that predicts two-year recidivism for a fold of the COMPAS dataset, found by CORELS.}
-\label{fig:rule-list-compas}
-\end{figure}
-
 The COMPAS dataset is a list of criminal offenders and information about them and their records.
 The classification problem that we're trying to solve is whether or not a given offender will commit another crime within 2 year of being arrested.
 As mentioned in the introduction, this problem was previously solved through the use of a black-box model because the authors of that model said that interpretability would harm accuracy.
@@ -268,23 +254,9 @@ Analysis of COMPAS scores by the creator of the score showed an AUC of .68 for p
 On this particular dataset, COMPAS scores achieve 61\% accuracy for predicting recidivism. 
 In addition, the creator of the COMPAS score says that it's difficult to get good accuracy without using racially influenced features:
 \begin{quote}
-"it is difficult to construct a score that doesn't include items that can be correlated with race â such as poverty, joblessness and social marginalization. 'If those are omitted from your risk assessment, accuracy goes down', he said."
+it is difficult to construct a score that doesn' not include items that can be correlated with race such as poverty, joblessness and social marginalization. 'If those are omitted from your risk assessment, accuracy goes down', he said.
 \end{quote}\cite{LarsonMaKiAn16}.
-We are able to extract 155 rules from the dataset, including rules that involve the race of the individual.
-
-\begin{figure}[t!]
-%\vspace{-3mm}
-\begin{algorithmic}
-\normalsize
-\State \bif $stop\text{ }reason=suspicious\text{ }object$ \bthen $yes$
-\State \belif $location=transit\text{ }authority$ \bthen $yes$
-\State \belif $stop\text{ }reason=suspicious\text{ }bulge$ \bthen $yes$
-\State \belse $no$
-\end{algorithmic}
-%\vspace{-3mm}
-\caption{The optimal rule list that predicts whether or not someone who is stopped by the NYPD has a weapon for one fold of the Stop and Frisk dataset, found by CORELS.}
-\label{fig:rule-list-stopfrisk}
-\end{figure}
+\noindent We are able to extract 155 rules from the dataset, including rules that involve the race of the individual.
 
 The Stop and Frisk dataset is a list of stops made by the New York City Police Department (NYPD) that contains information about the outcome of that stop: whether an individual was frisked, searched, or found carrying a weapon.
 The two classification problems that we are trying to solve are whether someone is carrying a weapon when stopped (which we refer to from now on as Weapon) and whether someone is frisked (referred to as Frisk).
@@ -294,8 +266,3 @@ We hope to provide a model that is short and easy to remember, but also has high
 
 This dataset is composed of 45787 individuals of whom 3.3\% are carrying a weapon and 66\% of whom are frisked.
 For Weapon, we are able to extract 46 rules, while Frisk yielded 64 rules.
-
-%TODO add sentence about how previous crimes could be racially biased because of criminal justice system
-Fig \ref{fig:rule-list-compas} and Fig \ref{fig:rule-list-stopfrisk} also show that neither the optimal rule list for COMPAS nor the one for Weapon includes a race related rule.
-Both datasets were mined for rules pertaining to race, which means that those rules were not predictive enough to be in the optimal rule list.
-This presents a reasonable heuristic for judges and police officers to evaluate these problems without racially biased reasoning.
