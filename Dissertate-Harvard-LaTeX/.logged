@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99991 (TeX Live 2014) (preloaded format=xelatex 2014.5.25)  25 MAR 2017 12:39
+This is XeTeX, Version 3.14159265-2.6-0.99991 (TeX Live 2014) (preloaded format=xelatex 2014.5.25)  30 MAR 2017 14:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -630,151 +630,6 @@ File: xkeyval.tex 2014/05/09 v2.6d key=value parser (HA)
 . fontspec info: "defining-font"
 . 
 . Font family 'EBGaramond(0)' created for font 'EB Garamond' with options
-. [Numbers={Proportional}].
-. 
-. This font family consists of the following shapes:
-. 
-. * 'normal' with NFSS spec.:
-. <->"EB Garamond/ICU:script=latn;language=DFLT;+pnum;"
-. 
-. * 'small caps' with NFSS spec.:
-. <->"EB Garamond/ICU:script=latn;language=DFLT;+pnum;+smcp;"
-. 
-. * 'italic' with NFSS spec.:
-. <->"EB Garamond/I/ICU:script=latn;language=DFLT;+pnum;"
-. 
-. * 'italic small caps' with NFSS spec.:
-. <->"EB Garamond/I/ICU:script=latn;language=DFLT;+pnum;+smcp;"
-. 
-. * 'bold italic' with NFSS spec.:
-. <->"EB Garamond/BI/ICU:script=latn;language=DFLT;+pnum;"
-. 
-. * 'bold italic small caps' with NFSS spec.:
-. <->"EB Garamond/BI/ICU:script=latn;language=DFLT;+pnum;+smcp;"
-.................................................
-\symDigits:m:n=\mathgroup6
-.................................................
-. fontspec info: "defining-font"
-. 
-. Font family 'EBGaramond(0)' created for font 'EB Garamond' with options
-. [Numbers={Proportional}].
-. 
-. This font family consists of the following shapes:
-.................................................
-\symLatin:m:n=\mathgroup7
-\symLatin:m:it=\mathgroup8
-.................................................
-. fontspec info: "defining-font"
-. 
-. Font family 'EBGaramond(0)' created for font 'EB Garamond' with options
-. [Numbers={Proportional}].
-. 
-. This font family consists of the following shapes:
-.................................................
-\symGreek:m:n=\mathgroup9
-\symGreek:m:it=\mathgroup10
-.................................................
-. fontspec info: "no-font-shape"
-. 
-. Could not resolve font EB Garamond/B (it probably doesn't exist).
-.................................................
-.................................................
-. fontspec info: "defining-font"
-. 
-. Font family 'EBGaramond(1)' created for font 'EB Garamond' with options [].
-. 
-. This font family consists of the following shapes:
-. 
-. * 'normal' with NFSS spec.:
-. <->"EB Garamond/ICU:script=latn;language=DFLT;"
-. 
-. * 'small caps' with NFSS spec.:
-. <->"EB Garamond/ICU:script=latn;language=DFLT;+smcp;"
-. 
-. * 'italic' with NFSS spec.:
-. <->"EB Garamond/I/ICU:script=latn;language=DFLT;"
-. 
-. * 'italic small caps' with NFSS spec.:
-. <->"EB Garamond/I/ICU:script=latn;language=DFLT;+smcp;"
-. 
-. * 'bold italic' with NFSS spec.:
-. <->"EB Garamond/BI/ICU:script=latn;language=DFLT;"
-. 
-. * 'bold italic small caps' with NFSS spec.:
-. <->"EB Garamond/BI/ICU:script=latn;language=DFLT;+smcp;"
-.................................................
-LaTeX Font Info:    Redeclaring math alphabet \mathrm on input line 83.
-LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `bold'
-(Font)                  EU1/EBGaramond(1)/m/n --> EU1/EBGaramond(1)/bx/n on inp
-ut line 83.
-LaTeX Font Info:    Redeclaring math alphabet \mathit on input line 83.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> EU1/EBGaramond(1)/m/it on input line 8
-3.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> EU1/EBGaramond(1)/m/it on input line 
-83.
-LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 83.
-LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> EU1/EBGaramond(1)/bx/n on input line 8
-3.
-LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
-(Font)                  OT1/cmr/bx/n --> EU1/EBGaramond(1)/bx/n on input line 8
-3.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  EU1/EBGaramond(1)/m/it --> EU1/EBGaramond(1)/bx/it on i
-nput line 83.
-\symOperators:m:n=\mathgroup11
-.................................................
-. fontspec info: "no-font-shape"
-. 
-. Could not resolve font EB Garamond/B (it probably doesn't exist).
-.................................................
-.................................................
-. fontspec info: "defining-font"
-. 
-. Font family 'EBGaramond(2)' created for font 'EB Garamond' with options
-. [Numbers=OldStyle, Ligatures={Common, TeX}, Scale=1.0].
-. 
-. This font family consists of the following shapes:
-. 
-. * 'normal' with NFSS spec.:
-. <->s*[1.0]"EB
-. Garamond/ICU:script=latn;language=DFLT;+onum;+liga;mapping=tex-text;"
-. 
-. * 'small caps' with NFSS spec.:
-. <->s*[1.0]"EB
-. Garamond/ICU:script=latn;language=DFLT;+onum;+liga;mapping=tex-text;+smcp;"
-. 
-. * 'italic' with NFSS spec.:
-. <->s*[1.0]"EB
-. Garamond/I/ICU:script=latn;language=DFLT;+onum;+liga;mapping=tex-text;"
-. 
-. * 'italic small caps' with NFSS spec.:
-. <->s*[1.0]"EB
-. Garamond/I/ICU:script=latn;language=DFLT;+onum;+liga;mapping=tex-text;+smcp;"
-
-. 
-. * 'bold italic' with NFSS spec.:
-. <->s*[1.0]"EB
-. Garamond/BI/ICU:script=latn;language=DFLT;+onum;+liga;mapping=tex-text;"
-. 
-. * 'bold italic small caps' with NFSS spec.:
-. <->s*[1.0]"EB
-. Garamond/BI/ICU:script=latn;language=DFLT;+onum;+liga;mapping=tex-text;+smcp;
-"
-.................................................
-LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
-(Font)              scaled to size 10.0pt on input line 87.
-.................................................
-. fontspec info: "no-font-shape"
-. 
-. Could not resolve font EB Garamond/B (it probably doesn't exist).
-.................................................
-.................................................
-. fontspec info: "defining-font"
-. 
-. Font family 'EBGaramond(3)' created for font 'EB Garamond' with options
 . [RawFeature={+c2sc,+scmp}].
 . 
 . This font family consists of the following shapes:
@@ -800,28 +655,28 @@ LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
 .................................................
 . fontspec info: "set-scale"
 . 
-. Lato Regular scale = 0.8094776164367054.
+. Lato Regular scale = 0.8509369163101765.
 .................................................
 \g_fontspec_family_Lato Regular_int=\count147
 .................................................
 . fontspec info: "set-scale"
 . 
-. Lato Regular scale = 0.8094776164367054.
+. Lato Regular scale = 0.8509369163101765.
 .................................................
 .................................................
 . fontspec info: "set-scale"
 . 
-. Lato Bold scale = 0.7992207019631172.
+. Lato Bold scale = 0.8401546698393813.
 .................................................
 .................................................
 . fontspec info: "set-scale"
 . 
-. Lato Regular/I scale = 0.8094776164367054.
+. Lato Regular/I scale = 0.8509369163101765.
 .................................................
 .................................................
 . fontspec info: "set-scale"
 . 
-. Lato Bold/I scale = 0.7992207019631172.
+. Lato Bold/I scale = 0.8401546698393813.
 .................................................
 .................................................
 . fontspec info: "defining-font"
@@ -832,32 +687,32 @@ LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
 . This font family consists of the following shapes:
 . 
 . * 'normal' with NFSS spec.:
-. <->s*[0.8094776164367054]"Lato Regular/ICU:script=latn;language=DFLT;"
+. <->s*[0.8509369163101765]"Lato Regular/ICU:script=latn;language=DFLT;"
 . 
 . * 'bold' with NFSS spec.:
-. <->s*[0.7992207019631172]"Lato Bold/ICU:script=latn;language=DFLT;"
+. <->s*[0.8401546698393813]"Lato Bold/ICU:script=latn;language=DFLT;"
 . 
 . * 'italic' with NFSS spec.:
-. <->s*[0.8094776164367054]"Lato Regular/I/ICU:script=latn;language=DFLT;"
+. <->s*[0.8509369163101765]"Lato Regular/I/ICU:script=latn;language=DFLT;"
 . 
 . * 'bold italic' with NFSS spec.:
-. <->s*[0.7992207019631172]"Lato Bold/I/ICU:script=latn;language=DFLT;"
+. <->s*[0.8401546698393813]"Lato Bold/I/ICU:script=latn;language=DFLT;"
 .................................................
 .................................................
 . fontspec info: "set-scale"
 . 
-. Source Code Pro scale = 0.8541673951674175.
+. Source Code Pro scale = 0.8979155871610088.
 .................................................
 \g_fontspec_family_Source Code Pro_int=\count148
 .................................................
 . fontspec info: "set-scale"
 . 
-. Source Code Pro scale = 0.8541673951674175.
+. Source Code Pro scale = 0.8979155871610088.
 .................................................
 .................................................
 . fontspec info: "set-scale"
 . 
-. Source Code Pro/B scale = 0.8541673951674175.
+. Source Code Pro/B scale = 0.8979155871610088.
 .................................................
 .................................................
 . fontspec info: "no-font-shape"
@@ -867,7 +722,7 @@ LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
 .................................................
 . fontspec info: "set-scale"
 . 
-. Source Code Pro/BI scale = 0.8541673951674175.
+. Source Code Pro/BI scale = 0.8979155871610088.
 .................................................
 .................................................
 . fontspec info: "defining-font"
@@ -878,13 +733,13 @@ LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
 . This font family consists of the following shapes:
 . 
 . * 'normal' with NFSS spec.:
-. <->s*[0.8541673951674175]"Source Code Pro/ICU:script=latn;language=DFLT;"
+. <->s*[0.8979155871610088]"Source Code Pro/ICU:script=latn;language=DFLT;"
 . 
 . * 'bold' with NFSS spec.:
-. <->s*[0.8541673951674175]"Source Code Pro/B/ICU:script=latn;language=DFLT;"
+. <->s*[0.8979155871610088]"Source Code Pro/B/ICU:script=latn;language=DFLT;"
 . 
 . * 'bold italic' with NFSS spec.:
-. <->s*[0.8541673951674175]"Source Code Pro/BI/ICU:script=latn;language=DFLT;"
+. <->s*[0.8979155871610088]"Source Code Pro/BI/ICU:script=latn;language=DFLT;"
 .................................................
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/caption/caption.sty
@@ -1121,30 +976,68 @@ Package: amsthm 2004/08/06 v2.20
 \CommentStream=\write3
 
 Excluding comment 'comment')
+(/usr/local/texlive/2014/texmf-dist/tex/latex/fullwidth/fullwidth.sty
+Package: fullwidth 2011/11/18 v0.1: fullwidth
+
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/zref-abspage.sty
+Package: zref-abspage 2012/04/04 v2.24 Module abspage for zref (HO)
+
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/zref-base.sty
+Package: zref-base 2012/04/04 v2.24 Module base for zref (HO)
+Package zref Info: New property list: main on input line 759.
+Package zref Info: New property: default on input line 760.
+Package zref Info: New property: page on input line 761.
+)
+\c@abspage=\count179
+Package zref Info: New property: abspage on input line 62.
+)
+\fwd@width@length=\skip124
+\fwd@skipabove@length=\skip125
+\fwd@skipbelow@length=\skip126
+\fwd@leftmargin@length=\skip127
+\fwd@rightmargin@length=\skip128
+\fwd@innertopmargin@length=\skip129
+\fwd@innerbottommargin@length=\skip130
+\fwd@splittopskip@length=\skip131
+\fwd@splitbottomskip@length=\skip132
+\fwd@outermargin@length=\skip133
+\fwd@innermargin@length=\skip134
+\fwd@footenotedistance@length=\skip135
+\c@fwd@zref@counter=\count180
+Package zref Info: New property: fwd@pagevalue on input line 209.
+\fwd@freevspace@length=\skip136
+)
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/listings.sty
-\lst@mode=\count179
+\lst@mode=\count181
 \lst@gtempboxa=\box50
 \lst@token=\toks39
-\lst@length=\count180
+\lst@length=\count182
 \lst@currlwidth=\dimen185
-\lst@column=\count181
-\lst@pos=\count182
+\lst@column=\count183
+\lst@pos=\count184
 \lst@lostspace=\dimen186
 \lst@width=\dimen187
-\lst@newlines=\count183
-\lst@lineno=\count184
+\lst@newlines=\count185
+\lst@lineno=\count186
 \lst@maxwidth=\dimen188
 
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2014/03/04 1.5c (Carsten Heinz)
-\c@lstnumber=\count185
-\lst@skipnumbers=\count186
+\c@lstnumber=\count187
+\lst@skipnumbers=\count188
 \lst@framebox=\box51
 )
 (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/listings.cfg
 File: listings.cfg 2014/03/04 1.5c listings configuration
 ))
 Package: listings 2014/03/04 1.5c (Carsten Heinz)
+
+(/usr/local/texlive/2014/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2013/02/03 v1.1-62 Sub-captions (AR)
+\c@subfigure=\count189
+\c@subtable=\count190
+)
+\c@subalgorithm=\count191
 )
 (./dissertation.aux)
 \openout1 = `dissertation.aux'.
@@ -1174,8 +1067,6 @@ LaTeX Font Info:    Try loading font information for T3+cmr on input line 7.
 File: t3cmr.fd 2001/12/31 TIPA font definitions
 )
 LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
-(Font)              scaled to size 12.0pt on input line 7.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
@@ -1211,4 +1102,9 @@ LaTeX Font Info:    Font shape `EU1/EBGaramond(2)/m/n' will be
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-ABD: EverySelectfont initializin
+ABD: EverySelectfont initializing macros
+LaTeX Info: Redefining \selectfont on input line 7.
+\AtBeginShipoutBox=\box52
+Package hyperref Info: Link coloring ON on input line 7.
+
+(/usr

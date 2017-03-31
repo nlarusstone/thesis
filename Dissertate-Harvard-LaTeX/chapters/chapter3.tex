@@ -11,34 +11,30 @@ Computer is a dataset comprised of $20$ individuals, whether they use a Mac or P
 %\vspace{-3mm}
 \begin{algorithmic}
 \normalsize
-\State Rule 1: \bif age $< 25$ \bthen $Mac$\,
+\State {\normalfont Rule 1}: \bif $age < 25$ \bthen $Mac$\,
 
 \begin{raggedleft}
 \includegraphics[width=0.5\textwidth]{figs/rule_1_cap.png}
 \end{raggedleft}
-
-\State Rule 2: \bif (in college) \bthen $Mac$\,
+\State {\normalfont Rule 2}: \bif $(education=college)$ \bthen $Mac$\,
 
 \begin{raggedleft}
 \includegraphics[width=0.5\textwidth]{figs/rule_2_cap.png}
 \end{raggedleft}
-
-\State Rule 3: \bif age $> 45 \wedge \neg$ (Software Engineer) \bthen $PC$\,
+\State {\normalfont Rule 3}: \bif $age > 45 \wedge \neg (job=software\text{ }engineer)$ \bthen $PC$\,
 
 \begin{raggedleft}
 \includegraphics[width=0.5\textwidth]{figs/rule_3_cap.png}
 \end{raggedleft}
-
-\State Rule 4: \bif $\neg$ (lives in California) \bthen $PC$\,
+\State {\normalfont Rule 4}: \bif $\neg (residence=california)$ \bthen $PC$\,
 
 \begin{raggedleft}
 \includegraphics[width=0.5\textwidth]{figs/rule_4_cap.png}
 \end{raggedleft}
-
 \end{algorithmic}
 %\vspace{-3mm}
 \caption{Example rules from the Computer dataset .
-The bit vector below the rule is a visual representation of the rule where each box is a data point.
+The bit vector below the rule is a visual representation of the rule---each box is a data point.
 Black boxes represent data points that are classified by a rule.
 Data points that are classified incorrectly are outlined in red.
 }
@@ -62,18 +58,17 @@ Rule 1, has a support of $5$ but only classifies $4$ of those samples correctly-
 \begin{algorithmic}
 \normalsize
 
-\State \textbf{Rule List 1}\\
-\State \bif age $< 25$ \bthen $Mac$\,
-\State \belif $\neg$ (lives in California) \bthen $PC$\,
+\State \textbf{Rule List 1}
+\State \bif $age < 25$ \bthen $Mac$\,
+\State \belif $\neg (residence=california)$ \bthen $PC$\,
 \State \belse $PC$
 
 \begin{raggedleft}
-\includegraphics[width=0.7\textwidth]{figs/rule_list_1_cap.png}
+\includegraphics[width=0.7\textwidth]{figs/rule_list_1_cap.png}\\
 \end{raggedleft}
-
-\State \textbf{Rule List 2}\\
-\State \bif $\neg$ (lives in California) \bthen $PC$\,
-\State \belif age $< 25$ \bthen $Mac$\,
+\State \textbf{Rule List 2}
+\State \bif $\neg (residence=california)$ \bthen $PC$\,
+\State \belif $age < 25$ \bthen $Mac$\,
 \State \belse $PC$
 
 \begin{raggedleft}
@@ -168,7 +163,7 @@ Our algorithm will use that difference to prune parts of the search space and tu
 \includegraphics[width=\textwidth]{figs/branch-and-bound-permutations.png}
 \includegraphics[width=\textwidth]{figs/branch-and-bound-permutations-pruned.png}
 \caption[Permutation bound]{This tree shows the use of the permutation bound in action. 
-Prefixes (1, 4) and (4, 1) are permutations of each other, so they capture identical data (see Fig \ref{rule-list-computer}).
+Prefixes (1, 4) and (4, 1) are permutations of each other, so they capture identical data (see Fig \ref{fig:rule-list-computer}).
 When we compare their lower bounds, we see the prefix (1, 4) has a better lower bound.
 Any rule list beginning with (4, 1) would be worse than the corresponding rule list beginning with (1, 4), so (4, 1) can be pruned and none of its children have to be examined.
 \label{fig:permutation-bound}}
@@ -178,11 +173,14 @@ As defined above, every sample is captured by precisely one rule---in the prefix
 Now consider a \textit{permutation} of the prefix (1, 4): the prefix (4, 1).
 Any samples that are captured by either rule 1 or 4 but not both will be captured identically in both rule lists.
 Samples that are captured by both rules will again be captured the same in both rule lists, though they may be predicted differently in the two rule lists.
-Thus, regardless of the order in which the rules appear, prefixes (1, 4) and (4, 1) will capture exactly the same set of data---this can be seen in the bit vectors of Fig \ref{rule-list-computers}.
+Thus, regardless of the order in which the rules appear, prefixes (1, 4) and (4, 1) will capture exactly the same set of data---this can be seen in the bit vectors of Fig \ref{fig:rule-list-computers}.
 They will differ only in which rules capture which samples, so their accuracies may differ.
 We can use this knowledge to create a bound that we call the \textit{permutation bound}.
 If we know that the lower bound of the prefix (1, 4) is better than the lower bound of (4, 1), we can eliminate from consideration all rule lists beginning with (4, 1).
 This is due to the fact that any rule list beginning with (1, 4) will capture exactly the same samples as the equivalent rule list beginning with (4, 1), but will have a better objective score.
+Fig \ref{fig:permutation-bound} demonstrates the pruning process with the prefixes (1, 4) and (4, 1).
+Since (1, 4) has a lower bound of 0.07 while (4, 1) has a lower bound of 0.16, we can prune (4, 1) and not pursue any of its children.
+
 Generalizing this principle allows us to eliminate all but one permutation of a given set of rules.
 When we are dealing with these permutations, it is helpful to map all permutations to a single ordering by ordering the rules in numerical order.
 We call this the \textit{canonical ordering} of a prefix.
@@ -212,7 +210,7 @@ However, we will never correctly classify that 3rd person because any rule will 
 So, our lower bound should take into account the fact that we will always mispredict that person.
 
 \section{Curiosity}
-\abel{def:curiosity}
+\label{def:curiosity}
 There are a number of different ways to explore the search space (see \ref{sec:queue}).
 Some methods, such as BFS, prioritize exploration---looking at all rule lists of a given length before proceeding to the next length.
 Others, such as a ordering by lower bound, focus purely on exploiting the best prefixes that we have seen.
@@ -220,23 +218,84 @@ We define a new metric, \textit{curiosity}, that combines exploration and exploi
 Lower values of curiosity mark prefixes that we explore first.
 Curiosity is a function of both the lower bound and the number of samples captured.
 This prioritizes rule lists that still have many samples left to capture (exploration) while also pursuing rule lists with promising lower bounds (exploitation).
-$$curiosity(RL) = (lowerBound(RL) + \lambda * len(RL))  * (nsamples / |captured(RL)|)$$
-We can see that the curiosity of Rule List 1 is $(.07 + 0.01 * 2) * (20 / 8) = 0.225$, while the curiosity of Rule List 2 is $(.22 + .01 * 2) * (20 / 8) = 0.6$.
+$$curiosity(RL) = (lowerBound(RL) - minority)  * (nsamples / |captured(RL)|)$$
+We can see that the curiosity of Rule List 1 is $(.07 - 0) * (20 / 8) = 0.175$, while the curiosity of Rule List 2 is $(.22 - 0) * (20 / 8) = 0.55$.
 Thus, curiosity prioritizes extending the more promising rule list.
 
 \section{Remaining Search Space}
-%TODO Review this section
 One metric for tracking the efficacy of our optimizations will be observing how quickly we reduce the remaining search space.
 We start with a combinatorially large search space, but quickly reduce it using our bounds.
-%TODO fix this sentence
 We calculate the remaining search space by determining how much each prefix could be expanded.
 We do this for every prefix we have evaluated and not eliminated.
-Due to our regularization term, we are able to bound the maximum length of a prefix as our best objective gets updated.
-This upper bound on the maximum length of a viable prefix allows us to place an upper bound on the search space as well.
-We find that the remaining search space decreases rapidly at the beginning of execution, then slowly decreases until the very end of execution when it again rapidly decreases.
+Due to our regularization term, we are able to bound the maximum length of any optimal rule list as our best objective gets updated.
+This upper bound on the maximum length of an optimal rule list allows us to place an upper bound on the remaining search space as well.
+The search space of our problem can be visualized as a tree with fanout $n - depth$.
+From the root, there are $n$ rules we can add, and then we can add $n - 1$ rules to each of those rules, and so forth.
+However, as the best objective we have seen gets better, there are more paths of the tree that we can eliminate and so our search tree grows smaller.
+%We find that the remaining search space decreases rapidly at the beginning of execution, then slowly decreases until the very end of execution when it again rapidly decreases.
 
+%TODO Add datasets and explain what classification problem we're trying to solve for them
 \section{Datasets}
 \label{def:datasets}
-Our algorithm is run on one of the training folds of the COMPAS dataset.
-The fold has 6489 data points from which we're able to extract 155 rules.
-2947 of these individuals are labeled "yes", meaning they have committed a second crime after being arrested---the other 3542 individuals are labeled "no".
+All of our datasets are split into a training set and a test dataset to test for accuracy.
+We then divide the training and test sets into 10 folds for cross validation.
+For our analysis that does not involve accuracy calculations, we choose a single fold on which to run and get our performance numbers.
+
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State \bif $(age=23\text{--}25) \wedge (priors=2text{--}3)$ \bthen $yes$
+\State \belif $(age=18text{--}20)$ \bthen $yes$
+\State \belif $(sex=male) \wedge (age=21text{--}22)$ \bthen $yes$
+\State \belif $(priors > 3)$ \bthen $yes$
+\State \belse $no$
+\end{algorithmic}
+%\vspace{-3mm}
+\caption{The optimal rule list that predicts two-year recidivism for a fold of the COMPAS dataset, found by CORELS.}
+\label{fig:rule-list-compas}
+\end{figure}
+
+The COMPAS dataset is a list of criminal offenders and information about them and their records.
+The classification problem that we're trying to solve is whether or not a given offender will commit another crime within 2 year of being arrested.
+As mentioned in the introduction, this problem was previously solved through the use of a black-box model because the authors of that model said that interpretability would harm accuracy.
+However, this black-box model has been accused of racially biased predictions \cite{LarsonMaKiAn16}.
+We explore this dataset with the goal of providing an interpretable, non-biased model that has accuracy comparable to state of the art black-box models.
+
+COMPAS has 7214 individuals, so our fold has 6489 data points.
+2947 (45.1\%) of these individuals are labeled "yes", meaning they have committed a second crime after being arrested---while the other 3542 (54.9\%) individuals are labeled "no".
+Analysis of COMPAS scores by the creator of the score showed an AUC of .68 for predicting any offense on a smaller dataset of 2300 individuals \cite{BrennanDiEh09}.
+On this particular dataset, COMPAS scores achieve 61\% accuracy for predicting recidivism. 
+In addition, the creator of the COMPAS score says that it's difficult to get good accuracy without using racially influenced features:
+\begin{quote}
+"it is difficult to construct a score that doesn't include items that can be correlated with race â such as poverty, joblessness and social marginalization. 'If those are omitted from your risk assessment, accuracy goes down', he said."
+\end{quote}\cite{LarsonMaKiAn16}.
+We are able to extract 155 rules from the dataset, including rules that involve the race of the individual.
+
+\begin{figure}[t!]
+%\vspace{-3mm}
+\begin{algorithmic}
+\normalsize
+\State \bif $stop\text{ }reason=suspicious\text{ }object$ \bthen $yes$
+\State \belif $location=transit\text{ }authority$ \bthen $yes$
+\State \belif $stop\text{ }reason=suspicious\text{ }bulge$ \bthen $yes$
+\State \belse $no$
+\end{algorithmic}
+%\vspace{-3mm}
+\caption{The optimal rule list that predicts whether or not someone who is stopped by the NYPD has a weapon for one fold of the Stop and Frisk dataset, found by CORELS.}
+\label{fig:rule-list-stopfrisk}
+\end{figure}
+
+The Stop and Frisk dataset is a list of stops made by the New York City Police Department (NYPD) that contains information about the outcome of that stop: whether an individual was frisked, searched, or found carrying a weapon.
+The two classification problems that we are trying to solve are whether someone is carrying a weapon when stopped (which we refer to from now on as Weapon) and whether someone is frisked (referred to as Frisk).
+Stop and Frisk has been a controversial program and recent work has alleged that these stops are racially motivated \cite{GoelRaSh16}.
+Goel, Rao, and Shroff suggest that police officers cannot evaluate a complex statistical model when deciding whether or not to make a stop and that a simple, interpretable heuristic model would be ideal.
+We hope to provide a model that is short and easy to remember, but also has high predictive accuracy when it comes to finding weapons or other contraband.
+
+This dataset is composed of 45787 individuals of whom 3.3\% are carrying a weapon and 66\% of whom are frisked.
+For Weapon, we are able to extract 46 rules, while Frisk yielded 64 rules.
+
+%TODO add sentence about how previous crimes could be racially biased because of criminal justice system
+Fig \ref{fig:rule-list-compas} and Fig \ref{fig:rule-list-stopfrisk} also show that neither the optimal rule list for COMPAS nor the one for Weapon includes a race related rule.
+Both datasets were mined for rules pertaining to race, which means that those rules were not predictive enough to be in the optimal rule list.
+This presents a reasonable heuristic for judges and police officers to evaluate these problems without racially biased reasoning.

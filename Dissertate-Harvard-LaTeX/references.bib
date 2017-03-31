@@ -49,6 +49,13 @@
  keywords = {Branch and bound, distance computation, hierarchical decomposition, k-nearest neighbors, tree-search algorithm.},
 }
 
+@article{HyafilRi76,
+title={Constructing Optimal Binary Decision Trees Is NP Complete},
+author="Laurent Hyafil and Ronald L. Rivest",
+journal={Information Processing Letters},
+year={1976}
+}
+
 @article{NarendraFu77,
  author = {Narendra, P. M. and Fukunaga, K.},
  title = {A Branch and Bound Algorithm for Feature Subset Selection},
@@ -120,7 +127,7 @@ year={1984}
  address = {Hingham, MA, USA}
 }
 
-@article{Blum90,
+@article{Blum92,
  author = {Blum, Avrim},
  title = {Learning Boolean Functions in an Infinite Attribute Space},
  journal = {Mach. Learn.},
@@ -158,11 +165,25 @@ author="Quinlan, J Ross",
   organization={IEEE}
 }
 
+@inproceedings{SegalOr94,
+title={Learning Decision Lists Using Homogeneous Rules},
+author="Richard Segal and Oren Etzioni",
+pages={619--625},
+booktitle = {Proceedings of the Twelfth AAAI National Conference on Artificial Intelligence},
+organization={AAAI},
+year={1994}
+}
+
+@inproceedings{NockGa95,
+  title={On learning decision committees},
+  author={Nock, Richard and Gascuel, Olivier},
+  booktitle={Proceedings of ICML-95, International Conference on Machine Learning},
+  pages={413--420},
+  year={1995}
+}
+
 @Inbook{Bratko97,
 author="Bratko, Ivan",
-editor="Della Riccia, Giacomo
-and Lenz, Hans-Joachim
-and Kruse, Rudolf",
 title="Machine Learning: Between Accuracy and Interpretability",
 bookTitle="Learning, Networks and Statistics",
 year="1997",
@@ -230,8 +251,6 @@ keywords = "Medical applications "
 
 @Inbook{Quinlan99,
 author="Quinlan, J. R.",
-editor="D{\v{z}}eroski, Sa{\v{s}}o
-and Flach, Peter",
 title="Some Elements of Machine Learning",
 bookTitle="Inductive Logic Programming: 9th International Workshop, ILP-99 Bled, Slovenia, June 24--27, 1999 Proceedings",
 year="1999",
@@ -243,7 +262,7 @@ doi="10.1007/3-540-48751-4_3",
 url="http://dx.doi.org/10.1007/3-540-48751-4_3"
 }
 
-@article{GarofalakisHyRaSh00,
+@inproceedings{GarofalakisHyRaSh00,
  author = {Minos Garofalakis and Dongjoon Hyun and Rajeev Rastogi and Kyuseok Shim},
  title = {Efficient Algorithms for Constructing Decision Trees with Constraints},
  booktitle = {Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
@@ -254,6 +273,26 @@ url="http://dx.doi.org/10.1007/3-540-48751-4_3"
  publisher = {ACM},
  address = {New York, NY, USA}
 }
+
+@article{EiterIbMa02,
+ author = {Eiter, Thomas and Ibaraki, Toshihide and Makino, Kazuhisha},
+ title = {Decision Lists and Related Boolean Functions},
+ journal = {Theor. Comput. Sci.},
+ issue_date = {January},
+ volume = {270},
+ number = {1-2},
+ month = jan,
+ year = {2002},
+ issn = {0304-3975},
+ pages = {493--524},
+ numpages = {32},
+ url = {http://dx.doi.org/10.1016/S0304-3975(01)00003-2},
+ doi = {10.1016/S0304-3975(01)00003-2},
+ acmid = {566244},
+ publisher = {Elsevier Science Publishers Ltd.},
+ address = {Essex, UK},
+ keywords = {Boolean functions, decision lists, extension problem, polynomial delay enumeration, teaching sequence},
+} 
 
 @article{LiYa02,
 title = "Text classification using ESC-based stochastic decision lists ",
@@ -272,7 +311,6 @@ keywords = {Text classification, Statistical learning, Stochastic decision list,
 
 @Inbook{BaesensMuDeVaSe05,
 author="Baesens, Bart and Mues, Christophe and De Backer, Manu and Vanthienen, Jan and Setiono, Rudy",
-editor="Camp, Olivier and Filipe, Joaquim B. L. and Hammoudi, Slimane and Piattini, Mario",
 title="Building Intelligent Credit Scoring Systems Using Decision Tables",
 bookTitle="Enterprise Information Systems V",
 year="2005",
@@ -299,6 +337,13 @@ url="http://dx.doi.org/10.1007/1-4020-2673-0_15"
  address = {Cambridge, MA, USA},
 }
 
+@article{KlivansSe06,
+title={Toward Attribute Efficient Learning of Decision Lists and Parities},
+author="Adam R. Klivans and Rocco A. Servedio",
+journal={JMLR},
+year={2006}
+}
+
 @article{LemmensCr06,
   title={Bagging and boosting classification trees to predict churn},
   author={Lemmens, Aur{\'e}lie and Croux, Christophe},
@@ -313,6 +358,7 @@ url="http://dx.doi.org/10.1007/1-4020-2673-0_15"
 @phdthesis{Ruping06,
 title={Learning interpretable models},
 author={R{\"u}ping, Stefan},
+school={Universitat Dortmund am Fachbereich Informatik},
 year={2006}
 }
 
@@ -340,6 +386,17 @@ keywords = {Data mining, Predictive models, Clinical medicine, Data mining proce
   pages={1--37},
   year={2008},
   publisher={Springer}
+}
+
+@article{BrennanDiEh09,
+  title={Evaluating the predictive validity of the COMPAS risk and needs assessment system},
+  author={Brennan, Tim and Dieterich, William and Ehret, Beate},
+  journal={Criminal Justice and Behavior},
+  volume={36},
+  number={1},
+  pages={21--40},
+  year={2009},
+  publisher={Sage Publications Sage CA: Los Angeles, CA}
 }
 
 @article {BellazziFeSa11,
@@ -412,10 +469,17 @@ pages={1350--1371}
   publisher={Wiley Online Library}
 }
 
-@article{YangRuSe16,
-title={Scalable {B}ayesian Rule Lists},
-author="Hongyu Yang and Cynthia Rudin and Margo Seltzer",
-journal={Preprint at arXiv:1602.08610},
+@article{BertsimasKiMa16,
+title={Best Subset Selection Via a Modern Optimization Lens},
+author="Dimitris Bertsimas, Angela King and Rahul Mazumder",
+journal={The Annals of Statistics},
+year={2016}
+}
+
+@article{GoelRaSh16,
+title={Precinct or Prejudice? Understanding Racila Disparities in New York City’s Stop-and-Frisk Policy},
+author="Sharad Goel, Justin M. Rao and Ravi Shroff",
+journal={The Annals of Applied Statistics},
 year={2016}
 }
 
@@ -423,37 +487,43 @@ year={2016}
 title={How We Analyzed the COMPAS Recidivism Algorithm},
 author="Jeff Larson and Surya Mattu and Lauren Kirchner and Julia Angwin",
 journal={ProPublica},
-year={2016}
-url={https://www.propublica.org/article/how-we-analyzed-the-compas-recidivism-algorithm}
+year={2016},
+url={https://www.propublica.org/article/how-we-analyzed-the-compas-recidivism-algorithm},
 note={Accessed 20 December 2016}
+}
+
+@article{YangRuSe16,
+title={Scalable {B}ayesian Rule Lists},
+author="Hongyu Yang and Cynthia Rudin and Margo Seltzer",
+journal={Preprint at arXiv:1602.08610},
+year={2016}
 }
 
 @article{AngelinoLaAlSeRu17,
 title={Learning Certifiably Optimal Rule Lists},
 author="Elaine Angelino and Nicholas Larus-Stone and Daniel Alabi and Margo Seltzer and Cynthia Rudin",
 journal={KDD},
-year={2017}
+year={2017},
 note={In submission}
 }
 
 @misc{Supercomputer,
-title={Top500 Supercomputer Sites, Directory page for Top500 lists}
-url={http://www.top500.org/statistics/sublist/}
+title={Top500 Supercomputer Sites, Directory page for Top500 lists},
+url={http://www.top500.org/statistics/sublist/},
 note={Accessed: 3/18/2017}
 }
 
-
-
-
-
-
-
-@article{,
-title={},
-author="",
-journal={},
-year={}
+@misc{HashFunctions,
+title={Hash Functions},
+author="Ozan Yigit",
+url={http://www.cse.yorku.ca/~oz/hash.html},
+note={Accesssed: 2/5/2017}
 }
+
+
+
+
+
 @article{,
 title={},
 author="",

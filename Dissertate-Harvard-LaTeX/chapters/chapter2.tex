@@ -27,10 +27,11 @@ In C$4.5$, nodes are chosen such that each split minimizes the amount of informa
 Both algorithms grow the initial tree greedily.
 However, this leads to extremely large trees, so they perform a post-processing step of pruning to avoid overfitting and maintain interpretability.
 
-While most decision trees are constructed greedily, and thus sub-optimally, there has been some work on constructing optimal decision trees \cite{Moret82}.
+The problem of constructing the optimal binary decision tree has been shown to be NP-Complete \cite{HyafilRi76}, where optimal means the fewest number of nodes.
+So, while most decision trees are constructed greedily, and thus sub-optimally, there has been some work on constructing optimal decision trees \cite{Moret82}.
 There has even been the use of a branch and bound technique in an attempt to construct more optimal decision trees.
 Garofalakis et al. introduce an algorithm to generate more interpretable decision trees by allowing constraints to be placed on the size of the decision tree \cite{GarofalakisHyRaSh00}.
-They use the branch-and-bound technique to constrain the size of the search space and limit the eventual size of the decision tree.
+They use the branch and bound technique to constrain the size of the search space and limit the eventual size of the decision tree.
 During tree construction, they bound the possible Minimum Description Length (MDL) cost of every different split at a given node.
 If every split at that node leads to a more expensive tree than the MDL cost of the current subtree, then that node can be pruned.
 In this way, they were able to prune the tree while constructing it instead of just constructing the tree and then pruning at the end.
@@ -53,16 +54,33 @@ This framework creates features from the raw binary data and then builds rules o
 Yang et al. builds on this earlier work by placing additional bounds on the search space and creating a fast low-level framework for computation, specifically a high performance bit vector manipulation library.
 We use that bit vector manipulation library to help perform computations involving calculating accuracy of rules \cite{YangRuSe16}.
 
+%TODO: Complete paragraph about discrete optimization/bounds in 90s
+Rivest's introduction of decision lists \cite{Rivest87} was soon after Valiant's theory of learnability \cite{Valiant84}.
+%, Rivest introduced decision lists and showed that they were efficiently learnable in a finite attribute space \cite{Rivest87}.
+Much of the work in the years immediately following the invention of decision lists were focused on issues of learnability and complexity rather than practical implementations.
+Some of this work has focused on the attribute efficiency of various algorithms \cite{Blum92, DhagatHe94}, while others have focused on the relationship between decision lists and classes of boolean functions such as DNF or CNF \cite{Rivest87, EiterIbMa02}.
+%Following the development of decision lists, researchers focused on both algorithms for learning decision lists \cite{DhagatHe94} and proving bounds about the attribute space \cite{Blum92}.
+%Blum built on this by proposing the problem of whether or not decision lists were learnable in an infinite attribute space \cite{Blum92}.
+%Dhagat and Hellerstein take it further to propose a specific solution to the decision list problem \cite{DhagatHe94}.
+%In the 1980s and 90s, following Rivest's introduction of rule lists \cite{Rivest87}, papers about learning decision lists were concerned with finding polynomial time solutions to learning rule lists.
+%Rivest showed that k-DL, the problem of learning decision lists with clauses of size k, included the problems of k-CNF, k-DNF, and learning decision trees of depth k.
+Other authors focused on a specific case of decision lists such as homogenous decision lists \cite{SegalOr94} or a more general cases of the decision list problem such as decision committees \cite{NockGa95}.
+%Nock and Gascuel show that learning decision committees includes k-DL and that learning the most parsimonious, but consistent decision committee is NP-Hard \cite{NockGa95}.
+%soon after the release of Valiant's theory of learnability \cite{Valiant84}, papers about learning decision lists were primarily concerned with bounding the complexity of such algorithms.
+Throughout the past 3 decades, the main thrust of the research has been to improve the complexity of both the number of examples and the runtime of their algorithms \cite{KlivansSe06}.
+%Klivans and Servedio improve bounds of both example complexity and runtime when learning of rule lists \cite{KlivansSe06}.
+However, most of these techniques are focused on finding an approximately correct solution.
+Despite discussing that the class of problems surrounding learning decision lists was NP-Hard, there seems to be no work on trying to solve the optimality problem.
+We hypothesize that hardware limitations played a large part in the lack of development of discrete optimization techniques with regards to the problem of decision lists.
+%due to the infeasibility of solving problems of a reasonable size using discrete optimization techniques on a pre-modern computer.
+%http://www.mli.gmu.edu/papers/91-95/91-28.pdf - MOnks
+
 Branch and bound was a technique originally developed to solve linear programming problems \cite{LandDo60}.
 The branch and bound algorithm recursively splits the data into subgroups, yielding a tree-like structure.
 Then, by calculating a value corresponding to the end goal of the algorithm (e.g., accuracy), some branches of the tree can be proved to be worse in every case than another branch and therefore can be pruned, reducing the search space.
 For decades, it has been used to great effect in the realm of mixed integer programming \cite{LinderothSa99}.
 It has also been applied to other NP-hard problems such as the Traveling Salesman Problem \cite{LittleMuSwKa63} and the Knapsack Problem \cite{Kolesar67}.
 More recently, it has been applied to machine learning problems such as feature subset selection \cite{NarendraFu77} and clustering \cite{NarendraFu75}.
-However, in recent times its popularity has declined in favor of convex optimization methods such as neural nets.
-
-TODO: Complete paragraph about discrete optimization/bounds in 90s
-
-In the $1980$s and $90$s, soon after the release of Valiant's theory of learnability \cite{Valiant84} and Rivest's development of decision lists \cite{Rivest87}, there were a host of papers concerned with bounding the efficiency of learning boolean functions (which are equivalent to decision lists).
-Blum \cite{Blum90}
-\cite{DhagatHe94}
+However, over the past few decades, its popularity has declined in favor of convex optimization methods such as neural nets.
+Researchers found other ways to achieve high accuracy for their predictive models by using large datasets that would take too long for branch and bound to complete.
+However, the continual improvements in computer hardware has led to a recent resurgence in the use of branch and bound techniques \cite{BertsimasKiMa16}.

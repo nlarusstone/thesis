@@ -1,7 +1,9 @@
 #!/bin/sh
-BASEDIR=$(dirname $0)
+#BASEDIR=$(dirname $0)
+BASEDIR=/Users/nlarusstone/Documents/Research/thesis/Dissertate-Harvard-LaTeX
+echo $BASEDIR
 cd $BASEDIR
-cd ..
+#cd ..
 
 # Build the dissertation.
 xelatex dissertation

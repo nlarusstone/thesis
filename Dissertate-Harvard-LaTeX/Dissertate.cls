@@ -207,7 +207,7 @@
     \contentspage
 	% \listoffigures % optional
 	%\dedicationpage
-	%\acknowledgments
+	\acknowledgments
 }
 
 \renewcommand{\maketitle}{
@@ -266,7 +266,7 @@
 
 \newcommand{\contentspage}{
     \pdfbookmark{\contentsname}{Contents}
-    \pagenumbering{arabic}
+    %\pagenumbering{arabic}
     \tableofcontents
 }
 
@@ -293,17 +293,17 @@
 
 
 \renewcommand{\backmatter}{
-    \begin{appendices}
-        \include{chapters/appendixA}
-    \end{appendices}
     \input{endmatter/personalize}
-    \clearpage
+    \clearpage  
     \begin{spacing}{\dcompressedspacing}
         \bibliography{references}
         \addcontentsline{toc}{chapter}{References}
         \bibliographystyle{apalike2}
         %\include{endmatter/colophon}
     \end{spacing}
+    \begin{appendices}
+        \include{chapters/appendixA}
+    \end{appendices}
 }
 
 
@@ -315,6 +315,7 @@
 %\usepackage{amsfonts}
 %\usepackage{caption}
 \usepackage{comment}
+\usepackage{fullwidth}
 %\usepackage{graphicx,verbatim}
 \usepackage{listings}
 \usepackage{subcaption}
