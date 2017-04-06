@@ -2,10 +2,8 @@
 \chapter{Proof of Bounds}
 \label{AppendixA}
 
-The following bounds and proofs are adapted from the joint work upon which this thesis is based \cite{AngelinoLaAlSeRu17}.
+The following bounds and proofs are adapted from the joint work upon which this thesis is based~\cite{AngelinoLaAlSeRu17}.
 
-%TODO put in appendix
-\begin{comment}
 \section{Rule lists for binary classification}
 We restrict our setting to binary classification.
 
@@ -48,12 +46,6 @@ ${\Labels = (q_1, \dots, q_K) \in \{0, 1\}^K}$~gives
 the label predictions associated with~$\Prefix$,
 and ${\Default \in \{0, 1\}}$ is the default label prediction.
 %
-In Figure~\ref{fig:rule-list}, ${\RL =}$ ${(r_1, r_2, r_3, r_4, r_0)}$,
-and each rule is of the form ${r_k = p_k \rightarrow q_k}$,
-for all ${k = 0, \dots, 4}$;
-equivalently, ${\RL = (\Prefix, \Labels, \Default, K)}$,
-where ${\Prefix = (p_1, p_2, p_3, p_4)}$, ${\Labels = (1, 1, 1, 1)}$,
-${\Default = 0}$, and ${K=4}$.
 
 Let ${\Prefix = (p_1, \dots, p_k, \dots, p_K)}$ be an antecedent list,
 then for any ${k \le K}$, we define ${\Prefix^k =}$ ${(p_1, \dots, p_k)}$
@@ -99,7 +91,8 @@ captures datum~$x_n$, and~0 otherwise.
 %
 For example, let~$\Prefix$ and~$\Prefix'$ be prefixes such that~$\Prefix'$ starts
 with~$\Prefix$, then~$\Prefix'$ captures all the data that~$\Prefix$ captures:
-${\{x_n: \Cap(x_n, \Prefix)\} \subseteq \{x_n: \Cap(x_n, \Prefix')\}}$.
+
+$${\{x_n: \Cap(x_n, \Prefix)\} \subseteq \{x_n: \Cap(x_n, \Prefix')\}}$$
 
 Now let~$\Prefix$ be an ordered list of antecedents,
 and let~$\beta$ be a subset of antecedents in~$\Prefix$.
@@ -153,7 +146,7 @@ In the remainder of our presentation, whenever we refer to a rule list with a
 particular prefix, we implicitly assume these empirically determined label predictions.
 
 Finally, we note that our approach leverages pre-mined rules,
-following the methodology taken by~\citet{LethamRuMcMa15} and~\citet{YangRuSe16}.
+following the methodology taken by~\cite{LethamRuMcMa15} and~\cite{YangRuSe16}.
 %
 One of the results we later prove implies a constraint
 that can be used as a filter during rule mining --
@@ -165,7 +158,7 @@ antecedents must have at least some minimum support
 
 Define a simple objective function for a rule list ${\RL = (\Prefix, \Labels, \Default, K)}$:
 \begin{align}
-\Obj(\RL, \x, \y) = \Loss(\RL, \x, \y) + \Reg K.
+\Obj(\RL, \x, \y) = \Loss(\RL, \x, \y) + \Reg K
 \label{eq:objective}
 \end{align}
 This objective function is a regularized empirical risk;
@@ -257,14 +250,13 @@ where we have suppressed the lower bound's dependence on label predictions~$\Lab
 because they are fully determined, given~${(\Prefix, \x, \y)}$.
 %
 Furthermore,
-\begin{arxiv}
 as we state next in Theorem~\ref{thm:bound},
-\end{arxiv}
 $b(\Prefix, \x, \y)$ gives a lower bound on the objective of
 \emph{any} rule list whose prefix starts with~$\Prefix$.
 
 \begin{theorem}[Hierarchical objective lower bound]
-Define~${b(\Prefix, \x, \y) = \Loss_p(\Prefix, \Labels, \x, \y) + \Reg K}$.
+Define
+$${b(\Prefix, \x, \y) = \Loss_p(\Prefix, \Labels, \x, \y) + \Reg K}$$
 %
 Also, define $\StartsWith(\Prefix)$
 to be the set of all rule lists whose prefix starts with~$\Prefix$,
@@ -299,7 +291,7 @@ rule list~${\RL' \in \StartsWith(\Prefix)}$ whose prefix~$\Prefix'$ starts with~
 %
 For the objective of such a rule list, the current best objective
 provides a lower bound, \ie
-${\Obj(\RL', \x, \y) \ge b(\Prefix', \x, \y) \ge}$ ${b(\Prefix, \x, \y) \ge \CurrentObj}$,
+$${\Obj(\RL', \x, \y) \ge b(\Prefix', \x, \y) \ge} {b(\Prefix, \x, \y) \ge \CurrentObj}$$,
 and thus~$\RL'$ cannot be optimal.
 
 Next, we state an immediate consequence of Theorem~\ref{thm:bound}.
@@ -369,7 +361,7 @@ upper bounds on prefix length for all prefixes that start with~$\Prefix$.
 
 \begin{theorem}[Prefix-specific upper bound on prefix length]
 \label{thm:ub-prefix-specific}
-Let ${\RL = (\Prefix, \Labels, \Default, K)}$ be a rule list, let
+Let $${\RL = (\Prefix, \Labels, \Default, K)}$$ be a rule list, let
 ${\RL' = (\Prefix', \Labels', \Default', K') \in \StartsWith(\Prefix)}$
 be any rule list such that~$\Prefix'$ starts with~$\Prefix$,
 and let~$\CurrentObj$ be the current best objective.
@@ -395,7 +387,7 @@ Algorithm~\ref{alg:branch-and-bound}.
 %
 We present Theorem~\ref{thm:remaining-eval-fine},
 in which we use information about the state of
-Algorithm~\ref{alg:branch-and-bound}'s execution
+Algorithm~\ref{alg:corels}'s execution
 to calculate, for any given execution state,
 upper bounds on the number of additional prefix evaluations that might
 be required for the execution to complete.
@@ -406,13 +398,13 @@ prefixes that are currently in or will be inserted into the queue.
 The relevant execution state depends on the current
 best objective~$\CurrentObj$ and information about
 prefixes we are planning to evaluate, \ie prefixes in the
-queue~$\Queue$ of Algorithm~\ref{alg:branch-and-bound}.
+queue~$\Queue$ of Algorithm~\ref{alg:corels}.
 %
 
 \begin{theorem}[Upper bound on the number of remaining prefix evaluations]
 \label{thm:remaining-eval-fine}
 Consider a state space of all rule lists formed from a set of~$M$ antecedents,
-and consider Algorithm~\ref{alg:branch-and-bound} at a particular instant
+and consider Algorithm~\ref{alg:corels} at a particular instant
 during execution.
 %
 Let~$\CurrentObj$ be the current best objective, let~$\Queue$ be the queue,
@@ -450,7 +442,7 @@ This gives an upper bound on the number of remaining prefix evaluations:
 
 The proposition below is a na\"ive upper bound on
 the total number of prefix evaluations over the course of
-Algorithm~\ref{alg:branch-and-bound}'s execution.
+Algorithm~\ref{alg:corels}'s execution.
 %
 It only depends on the number of rules and
 the regularization parameter~$\Reg$;
@@ -461,7 +453,7 @@ bound the size of the search space.
 \begin{proposition}[Upper bound on the total number of prefix evaluations]
 \label{thm:ub-total-eval}
 Define~$\TotalRemaining(\RuleSet)$ to be the total number of prefixes
-evaluated by Algorithm~\ref{alg:branch-and-bound}, given the state space of
+evaluated by Algorithm~\ref{alg:corels}, given the state space of
 all rule lists formed from a set~$\RuleSet$ of~$M$ rules.
 %
 For any set~$\RuleSet$ of $M$ rules,
@@ -492,7 +484,8 @@ both are related to the regularization parameter~$\Reg$.
 
 \begin{theorem}[Lower bound on antecedent support]
 \label{thm:min-capture}
-Let ${\OptimalRL = (\Prefix, \Labels, \Default, K) \in \argmin_\RL \Obj(\RL, \x, \y)}$
+Let
+$${\OptimalRL = (\Prefix, \Labels, \Default, K) \in \argmin_\RL \Obj(\RL, \x, \y)}$$
 be any optimal rule list, with objective~$\OptimalObj$.
 %
 For each antecedent~$p_k$ in prefix ${\Prefix = (p_1, \dots, p_K)}$,
@@ -511,7 +504,8 @@ Theorem~\ref{thm:min-capture-correct} gives a tighter bound
 by leveraging this information.
 \begin{theorem}[Lower bound on accurate antecedent support]
 \label{thm:min-capture-correct}
-Let ${\OptimalRL \in \argmin_\RL \Obj(\RL, \x, \y)}$
+Let
+$${\OptimalRL \in \argmin_\RL \Obj(\RL, \x, \y)}$$
 be any optimal rule list, with objective~$\OptimalObj$;
 let ${\OptimalRL = (\Prefix, \Labels, \Default, K)}$,
 with prefix ${\Prefix = (p_1, \dots, p_K)}$
@@ -538,7 +532,7 @@ checking it first can accelerate pruning.
 %
 In addition to applying Theorem~\ref{thm:min-capture} in the context of
 constructing rule lists, we can furthermore apply it in the context of
-rule mining~(\S\ref{sec:setup}).
+rule mining.
 %
 Specifically, it implies that we should only mine rules with
 normalized support greater than~$\Reg$;
@@ -584,7 +578,8 @@ such that~$\Prefix$ and~$\PrefixB$ capture the same data,~\ie
 \end{align}
 %
 If the objective lower bounds of~$\RL$ and~$\RLB$
-obey ${b(\Prefix, \x, \y) \le b(\PrefixB, \x, \y)}$,
+obey
+${b(\Prefix, \x, \y) \le b(\PrefixB, \x, \y)}$,
 then the objective of the optimal rule list in~$\StartsWith(\Prefix)$ gives a
 lower bound on the objective of the optimal rule list in~$\StartsWith(\PrefixB)$:
 \begin{align}
@@ -669,7 +664,7 @@ pruning~(\S\ref{sec:permutation}).
 Since every subset of~$K$ antecedents generates an equivalence
 class of~$K!$ prefixes equivalent up to permutation, symmetry-aware
 pruning dramatically reduces the search space.
-Algorithm~\ref{alg:branch-and-bound} describes a
+Algorithm~\ref{alg:corels} describes a
 breadth-first exploration of the state space of rule lists.
 %
 Now suppose we integrate symmetry-aware pruning into
@@ -732,7 +727,7 @@ which is smaller by a factor of about~360,000.
 While~$10^{24}$ seems infeasibly enormous,
 it does not represent the number of rule lists we evaluate.
 %
-As we show in ~(\S\ref{sec:experiments}),
+As we show in ~(\S\ref{exp:ablation-pmap}),
 our permutation bound in Corollary~\ref{thm:permutation}
 and our other bounds together conspire to reduce the search space
 to a size manageable on a single computer.
@@ -744,7 +739,7 @@ ${K=10}$ rules represents a (heuristic) upper limit on
 the size of an interpretable rule list,
 and ${M=1000}$ represents the approximate number of rules
 with sufficiently high support (Theorem~\ref{thm:min-capture})
-we expect to obtain via rule mining~(\S\ref{sec:setup}).
+we expect to obtain via rule mining.
 %for many datasets that might be used for constructing interpretable models.
 
 \subsection{Equivalent points bound}
@@ -771,7 +766,7 @@ let~${\{e_u\}_{u=1}^U}$ enumerate these sets.
 %
 Now define~$\theta(e_u)$ to be the normalized support of the minority
 class label with respect to set~$e_u$, \eg let
-${e_u = \{x_n : \one [ \Cap(x_n, s_m) = \Cap(x_i, s_m) ] \}}$,
+$${e_u = \{x_n : \one [ \Cap(x_n, s_m) = \Cap(x_i, s_m) ] \}}$$,
 and let~$q_u$ be the minority class label among points in~$e_u$, then
 \begin{align}
 \theta(e_u) = \frac{1}{N} \sum_{n=1}^N \one [ x_n \in e_u ] \wedge \one [ y_n = q_u ].
@@ -779,7 +774,7 @@ and let~$q_u$ be the minority class label among points in~$e_u$, then
 
 The existence of equivalent points sets with non-singleton support
 yields a tighter objective lower bound that we can combine with our other bounds;
-as our experiments demonstrate~(\S\ref{sec:experiments}),
+as our experiments demonstrate~(\S\ref{exp:ablation-equiv}),
 the practical consequences can be dramatic.
 %
 First, for intuition, we present a global bound in
@@ -814,6 +809,3 @@ b_0(\Prefix, \x, \y) = \frac{1}{N} \sum_{u=1}^U \sum_{n=1}^N
     \neg\, \Cap(x_n, \Prefix) \wedge \one [ x_n \in e_u ] \wedge \one [ y_n = q_u ]. \nn
 \end{align}
 \end{theorem}
-
-
-\end{comment}

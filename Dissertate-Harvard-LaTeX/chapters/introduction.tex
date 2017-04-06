@@ -1,45 +1,45 @@
 %!TEX root = ../dissertation.tex
 \chapter{Introduction}
 \label{introduction}
-
-As computing power continues to grow, combinatorial optimization problems that may have been out of the reach of earlier computational power can now be feasibly executed.
+As computing power continues to grow, combinatorial optimization problems that may not have been possible using less powerful hardware can now be reliably completed on a commodity laptop.
 The goal of this thesis is to discuss a number of data structure optimizations that allow for the completion of medium to large scale combinatorial optimization problems.
-This work builds off of the theoretical bounds and implementation found in Angelino et. al \cite{AngelinoLaAlSeRu17}.
-While the techniques found in this thesis are specific to a given machine learning technique, it is our hope that they can be generalized to other combinatorial optimization problems.
+This work builds off of the theoretical bounds and implementation found in Angelino et al.~\cite{AngelinoLaAlSeRu17}
+While the techniques found in this thesis are applied to the machine learning technique of rule lists, it is our hope that they can be generalized to other combinatorial optimization problems.
 
 We work in the realm of machine learning, specifically focusing on the interpretability of predictive models.
 Our algorithm produces models that are highly predictive, but in which each step of the model's decision making process can also be understood by humans.
 Machine learning models, such as neural nets or support vector machines, can achieve stunning predictive accuracy, but the reasons for their predictions remain unintelligible to a human user.
 This lack of interpretability is important, because models that are not understood by humans may have hidden bias in their predictive decision making.
-A recent ProPublica article found racial bias in the use of a black box machine learning model used to create risk assessments intended to help judges with criminal sentencing \cite{LarsonMaKiAn16}.
-Northepointe, the company providing COMPAS (the black box model), argues that their use of a black box model is necessitated by the fact that they can achieve better accuracy through the use of that model.
-This thesis is part of a body of work that attempts to disprove that statement by showing that it is possible to build interpretable machine learning models without sacrificing accuracy.
+A recent ProPublica article found racial bias in the use of a black box machine learning model used to create risk assessments intended to help judges with criminal sentencing~\cite{LarsonMaKiAn16}.
+Northepointe, the company providing COMPAS (the black box model), argues that they need to use a black box model in order to achieve higher accuracy.
+This thesis is part of a body of work that showing that it is possible to build interpretable machine learning models without sacrificing accuracy.
 
-To achieve interpretability, we use \emph{rule lists}, also known as decision lists, which are lists comprised of \emph{if-then} statements \cite{Rivest87}. 
-This structure allows for predictive models that can be easily interpreted, because each prediction is explained by the rule that is satisfied. 
+There are negative repercussions for applying biased models, so it is preferable to have a model that can be understood by the people applying it.
+For some problems, though, interpretable models are less accurate than black box models.
+So, it is important to know the limit of interpretable models.
+Finding the optimal solution for an interpretable model provides an important upper bound on the accuracy of that model.
+This helps decision makers decide whether or not a problem can be solved using interpretable models or whether a black box model really does achieve better accuracy.
+
+To achieve interpretability, we use \emph{rule lists}, also known as decision lists, which are lists comprised of \emph{if-then} statements~\cite{Rivest87}. 
+This structure allows for predictive models that can be easily interpreted, because each prediction is explained by examining which rule is satisfied. 
 Given a set of rules associated with a dataset, every possible ordering of rules produces a unique rule list.
-Since most data points can be classified by multiple rules, changing the order of rules leads to different predictions and therefore different accuracies. 
+Since most data points can be classified by multiple rules, changing the order of rules could lead to the same data point being predicted differently; therefore, different orderings have differing accuracies. 
 Rule list generation algorithms attempt to maximize predictive accuracy through the discovery of different rule lists.
-
-Generally, interpretable models are viewed as less accurate than black box models.
-Thus, proving the optimality of an interpretable model provides an important upper bound on the accuracy of that model.
-This helps decision makers decide whether or not to use interpretable models.
-In our case, we are searching for the rule list with the highest accuracy----the optimal rule list. 
+In our case, we are searching for the rule list with the highest accuracy---the optimal rule list. 
 A brute force solution to find the the optimal rule list is computationally prohibitive due to the exponential number of rule lists.
 Our algorithm uses combinatorial optimization to find the optimal rule list in a reasonable amount of time.
 
-Recent work on generating rule lists \cite{LethamRuMcMa15,YangRuSe16} uses probabilistic approaches to generating rule lists.
+Recent work on generating rule lists~\cite{LethamRuMcMa15,YangRuSe16} instead uses probabilistic approaches to generating rule lists.
 These approaches achieve high accuracy quickly.
 However, despite the apparent accuracy of the rule lists generated by these algorithms, there is no way to determine if the generated rule list is optimal or how close to optimal it is. 
-Our model, called Certifiably Optimal RulE ListS (CORELS), finds the optimal rule list and also allows us to investigate the accuracy of near optimal solutions\ref{footnote:code}. 
-\footnote{\label{footnote:code} Our code can be found at github.com/nlarusstone/corels.}
+Our model, called Certifiably Optimal RulE ListS (CORELS), finds the optimal rule list and also allows us to investigate the accuracy of near optimal solutions\footnote{\label{footnote:code} Code can be found at github.com/nlarusstone/corels.}.
 The benefits of this model are two-fold: first, we are able to generate the best rule list on a given data set and therefore will have the most accurate predictions that a rule list can give.
 Second, since CORELS generates the entire space of potential solutions, we can evaluate the quality of rule lists generated by other algorithms. 
 In particular, we can determine if the rule lists from probabilistic approaches are nearly optimal or whether those approaches sacrifice too much accuracy for speed.
 This will allow us to bound the accuracy on important problems and determine if interpretable methods should be used.
 
 CORELS achieves these results by optimizing an objective function and placing a set of bounds on the best objective that a rule list can achieve in the future. 
-This allows us to prune that rule list if that bound is worse than the objective value of the best rule list that we have already examined.
+This allows us to prune that rule list if those bounds are worse than the objective value of the best rule list that we have already examined.
 We continue to examine rule lists until we have either examined every rule list or eliminated all but one from consideration. 
 Thus, when the algorithm terminates, we have found the rule list with the best possible accuracy. 
 Our use of this branch and bound technique leads to massive pruning of the search space of potential rule lists and allows our algorithm to find the optimal rule list on real data sets.
@@ -51,39 +51,43 @@ This means we may not always find the highest accuracy rule list---our optimalit
 This requires each rule to classify a minimum amount of data correctly to make it worth the penalty of making a rule list longer. 
 This limits the overall length of our rule lists and avoids overfitting, as well as preventing us from investigating rule lists containing useless rules.
 
-The exponential nature of the problem means that the efficacy of CORELS is partially dependent on how much our bounds allow us to prune. 
-We list a few types of bounds that allow us to drastically prune our search space. 
+The exponential nature of the problem means that the efficacy of CORELS is largely dependent on how much our bounds allow us to prune. 
+There are three classes of bounds that allow us to drastically prune our search space. 
 The first type of bound is intrinsic to the rules themselves.
-This category includes bounds such the bound described above that ensures that rules capture enough data correctly to overcome a regularization parameter. 
+This category includes bounds such as the bound described above that ensures that rules capture enough data correctly to overcome a regularization parameter. 
 Our second type of bound compares the best future performance of a given rule list to the best solution encountered so far. 
 We can avoid examining parts of the search space whose maximum possible accuracy is less than the accuracy of our current best solution. 
-Finally, our last class of bounds uses a symmetry-aware map to prune all but the best permutation of any given set of rules.
+Finally, our last class of bounds compares similar rule lists and uses a symmetry-aware map to prune all but the best permutation of any given set of rules.
 
 To keep track of all of these bounds for each rule list, we implemented a modified trie that we call a prefix tree. 
-Each node in the prefix tree represents an individual rule; thus, each path in the tree represents a rule list where the final node in the path contains metrics about that rule list such as its accuracy and the number of data points already classified.
+Each node in the prefix tree represents an individual rule; thus, each path in the tree represents a rule list where the final node in the path contains metrics about that rule list such as its accuracy and the number of data points classified.
 This tree structure facilities the use of multiple different selection algorithms including breadth-first search, a priority queue based on a custom function that trades off exploration and exploitation, and a stochastic selection process. 
 In addition, we are able to limit the number of nodes in the tree and thereby achieve a way of tuning space-time tradeoffs in a robust manner. 
-We propose that this tree structure is a useful way of organizing the generation of rule lists and allows the implementation of CORELS to be easily parallelized.
+This tree structure is a useful way of organizing the generation of rule lists and it allows the implementation of CORELS to be easily parallelized.
 
-We applied CORELS to the problem of predicting criminal recidivism on the COMPAS dataset.
-Larson et al examines the problem of predicting recidivism and shows that a black box model, specifically the COMPAS score from the company Northpointe, leads to racially biased predictions \cite{LarsonMaKiAn16}.
+We applied CORELS to two problems that have had black box models accused of racial bias.
+First, we investigate the problem of predicting criminal recidivism on the COMPAS dataset.
+Larson et al. examines the problem of predicting recidivism and shows that a black box model, specifically the COMPAS score from the company Northpointe, leads to racially biased predictions~\cite{LarsonMaKiAn16}.
 Black defendants are misclassified at a higher risk for recidivism than occurs in practice, while white defendants are misclassified at a lower risk. 
 The model that produces the COMPAS scores is a black box algorithm, which is not interpretable, and therefore the model does not provide a way for human input to correct for these racial biases. 
-Our model produces accuracies that are similar to standard predictive models and the black-box COMPAS scores while maintaining interpretability.
+We also explore the problem of predicting whether or not someone is carrying a weapon using the Stop and Frisk dataset.
+This dataset, released by the New York Civil Liberties Union, has been analyzed by Goel et al. to show that black individuals are stopped disproportionately often.
+We propose that the rule list generated by CORELS could be used as a heuristic for NYC police officers who need to decide whether or not to make a stop.
+On both problems, our model produces accuracies that are similar to standard black-box predictive models while maintaining interpretability and having no evidence of racial bias.
 
 CORELS demonstrates a novel approach towards generating interpretable models by identifying and certifying the optimal rule list. 
 While searching for that optimal list, we are able to discover near-optimal solutions that provide insight into how effective other interpretable methods might be. 
-Rule lists have been around for $30$ years \cite{Rivest87}, but computational power has been too limited to use discrete optimization to attack problems of reasonable scale.
+Rule lists have been around for $30$ years~\cite{Rivest87}, but computational power has been too limited to use discrete optimization to attack problems of reasonable scale.
 
 There are two major contributions of this work.
-First, it shows that discrete optimization techniques are computationally feasible with our current set of tools.
-Additionally, the optimizations performed on our tree structure and symmetry-aware map can be applied more broadly to other discrete optimization problems.
+First, it shows that discrete optimization techniques are computationally feasible with today's hardware.
+Additionally, the optimizations performed on our tree and symmetry-aware map can be generalized and applied more broadly to other discrete optimization problems.
 %Finally, we present a thorough exploration of a problem that was supposed to require only black-box models
 
-Chapter $2$ provides an overview of related work in the fields of discrete optimization, interpretable models, and rule lists. 
+Chapter $2$ provides an overview of related work in the fields of interpretable models, rule lists, and discrete optimization. 
 Chapter $3$ proves definitions and explanations of the terminology used in the rest of this thesis.
 Chapter $4$ describes the implementation and architecture of CORELS, paying special attention to the data structures used to make this problem tractable.
-Chapter $5$ explains the data structure optimizations performed and the experiments used to validate these optimizations.
+Chapter $5$ explains the data structure optimizations performed and exhibits the experiments used to measure and validate these optimizations.
 
 \newpage
 

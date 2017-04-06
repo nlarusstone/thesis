@@ -1,14 +1,15 @@
 %!TEX root = ../dissertation.tex
 \chapter{Experiments}
 
-All of the following experiments were executed on a commodity laptop, a MacBook Air with a 1.4 GHz Intel Core i5 processor and 8GB of RAM.
+\newthought{The following experiments were executed on a commodity laptop}, a MacBook Air with a 1.4 GHz Intel Core i5 processor and 8GB of RAM.
 The lowend nature of our platform illustrates the potential ubiquity of using discrete optimization techniques.
-In addition, we hope that this accessibility will allow our model to be used in places without advanced computing resources such as police departments, courts, and hospitals.
+In addition, we hope that this accessibility will allow our model to be used in places that typically lack advanced computing resources such as police departments, courts, and hospitals.
 
 We first examine the accuracy of our algorithm on each of our datasets and compare it to other interpretable and non-interpretable methods.
 Then, we demonstrate that without our algorithmic and data structure improvements, it would be intractable to solve a real-world problem.
 We also show that even with our improvements, this algorithm would not have been able to be run just 25 years ago.
 Next, we examine the improvements made to our symmetry-aware map to reduce the memory overhead on our algorithm.
+Then, we discuss the benefits of implementing our algorithm using templates as opposed to inheritance.
 Finally, we describe a parallel implementation and some of the issues that complicate a parallel implementation.
 
 \begin{figure}
@@ -20,10 +21,12 @@ Finally, we describe a parallel implementation and some of the issues that compl
 \vspace{-1cm}
 \caption{10-fold cross validation of various machine learning models on the COMPAS and Weapon datasets.
 CORELS performs as well as or better than equivalent interpretable and black-box models.
-Method type from left to right: Logistic Regression, Support Vector Machine, Boosted Decision Tree, Decision Tree, Decision Tree, Random Forest, (Rule Set), Rule List, Rule List}
+Method type from left to right: Logistic Regression, Support Vector Machine, Boosted Decision Tree, Decision Tree, Decision Tree, Random Forest, (Rule Set), Rule List, Rule List.
+Note that RIPPER (a Rule Set algorithm) is absent in the Weapon dataset.
+}
+\label{fig:accuracy}
 \end{minipage}
 \end{center}
-\label{fig:accuracy}
 \end{figure}
 %\afterpage{\clearpage}
 \section{Accuracy}
@@ -31,7 +34,7 @@ We tested CORELS for accuracy on the COMPAS and Weapon datasets.
 In addition to CORELS, we tested other interpretable rule based methods such as RIPPER and SBRL, tree methods such as CART, C4.5, and Adaboost, and less interpretable algorithms such as random forests, logistic regression, and SVMs.
 Fig \ref{fig:accuracy} shows that CORELS performs just as well as any other predictive method that we tested on the COMPAS and Weapon datasets.
 Both of these problems are difficult, so no model is able to capture all of the nuances of human behavior perfectly.
-We see that CORELS performs slightly better than other rule based methods such as SBRL and RIPPER \cite{YangRuSe16}, but that these other methods are not far from optimal.
+We see that CORELS performs slightly better than other rule based methods such as SBRL and RIPPER, but that these other methods are not far from optimal.
 In addition, we see no increase in accuracy granted by using a non-interpretable method instead of an interpretable method such as CORELS.
 This provides evidence against the claim that predictive accuracy on these problems will suffer if an interpretable algorithm is used.
 
@@ -53,59 +56,60 @@ This provides evidence against the claim that predictive accuracy on these probl
 \State \belse $no$
 \end{algorithmic}
 %\vspace{-3mm}
-\caption{Above: The optimal rule list that predicts two-year recidivism for a fold of the COMPAS dataset, found by CORELS.
-Below: The optimal rule list that predicts whether or not someone who is stopped by the NYPD has a weapon for one fold of the Stop and Frisk dataset, found by CORELS.}
+\caption{Top: The optimal rule list that predicts two-year recidivism for a fold of the COMPAS dataset, found by CORELS.
+Bottom: The optimal rule list that predicts whether or not someone who is stopped by the NYPD has a weapon for one fold of the Stop and Frisk dataset, found by CORELS.}
 \label{fig:rule-list-optimal}
 \end{figure}
 
 %TODO add sentence about how previous crimes could be racially biased because of criminal justice system
-Fig \ref{fig:rule-list-optimal} shows that neither the optimal rule list for COMPAS nor the one for Weapon includes a race related rule.
+Fig \ref{fig:rule-list-optimal} shows the optimal rule lists for the COMPAS and Weapon datasets.
+Neither of the optimal rule lists includes a race related rule.
 Both datasets were mined for rules pertaining to race, which means that those rules were not predictive enough to be in the optimal rule list.
 This shows that it is possible to get models with state of the art accuracy that do not rely on race to make their predictions.
 Thus, the excuse that using a racially biased model is more predictive does not hold true.
-These rule lists are short and accurate and therefore would be useful as a racially unbiased heuristic aid for judges and police officers.
+In addition, these rule lists are short and accurate and therefore would be useful as a racially unbiased heuristic aid for judges and police officers.
 
-\section{Isolated Component Analysis}
+\section{Isolated Optimization Analysis}
 We wished to determine how helpful each theoretical bound and data structure optimization was.
 We ran a number of experiments where we took out a single component from our system and measured the effects on the runtime and memory usage of our algorithm.
-We find that the equivalent points bound is our most important optimization for running in a reasonable amount of time.
-Each other optimization and bound plays an important, but not crucial, role in the speed of our algorithm.
+We find that, depending on the structure of our problem, different bounds have differing importance.
 
 In addition, we wanted to find out how much of an overall speed-up CORELS gave compared to a naive implementation.
 On the COMPAS dataset, where $n = 155$, naively evaluating all prefixes of up to length 5 would require examining 84,382,025,575 different prefixes.
-However, with our solution, we examine only 99,891,878 prefixes in total---a reduction of 845x.
+However, with our solution, we examine only 83,357,673 prefixes in total---a reduction of 1012x.
 Note that this is a lower bound on the reduction since any brute force solution would have to examine prefixes of longer than length 5 to certify optimality.
 It takes us about 2$\mu$s to evaluate a single prefix.
-Thus, a naive solution would take 168,764s---about 2 days---while CORELS takes only 2 minutes.
+A naive solution would take 168,764s---about 2 days---while CORELS takes only 2 minutes.
 While the naive solution will eventually complete for this dataset, it is clear that brute force wouldn't scale to larger problems.
 
-However, if we look at how processor speeds have changed over the last 25 years, we can see that computers are about 1,000,000 faster now than they were in 1993. \cite{Supercomputer}
-Even with our algorithmic and data structural improvements, CORELS would have taken over 120,000,000s in 1993---an unreasonable amount of time.
-Our advances are only meaningful because we can run them on a modern system.
-When we combine our algorithmic improvements with the increased processor speeds,we see that our algorithm runs almost 1 billion times faster than a naive implementation would have in 1993.
+However, if we look at how processor speeds have changed over the last 25 years, we can see that computers are about 1,000,000 faster now than they were in 1993~\cite{Supercomputer}.
+Even with our algorithmic and data structural improvements, CORELS would have run in over 120,000,000s in 1993---an unreasonable amount of time.
+Thus, our advances are only meaningful because we can run them on a modern system.
+Combining our algorithmic improvements with the increase in modern processor speeds, our algorithm runs more than 1 billion times faster than a naive implementation would have in 1993.
 %Nov 2016 125,435.9 TFlops/s
 %June 1993 131.0 GFlops/s
 
 \begin{figure}
 \begin{center}
 \begin{minipage}{\textwidth}
-\includegraphics[width=0.9\textwidth]{figs/corels_mem.png}
-\includegraphics[width=0.9\textwidth]{figs/corels_size.png}
+\vspace{-1.3cm}
+\includegraphics[width=0.85\textwidth]{figs/corels_mem.png}
+\includegraphics[width=0.85\textwidth]{figs/corels_size.png}
+\vspace{-0.5cm}
 \caption{Memory usage of full CORELS system on the COMPAS dataset. 
 Our prefix tree accounts for the bulk of the memory usage.
 The size (in number of items) of each of our main data structures.
 Corresponds to the amount of memory used.}
+\label{fig:corels-mem}
 \end{minipage}
 \end{center}
-\label{fig:corels-mem}
 \end{figure}
 
 \subsection{Full CORELS system}
-
-Our baseline system with all of our improvements is the CORELS system.
+The algorithm with all of our improvements is called the CORELS system.
 Running the full CORELS system on the Weapon dataset yields the optimal solution and certificate within 142s.
 COMPAS is slightly faster, allowing us to discover and certify optimality within 124s.
-Fig \ref{fig:corels-mem} shows the growth of our data structures and memory usage throughout the execution of our algorithm.
+Fig \ref{fig:corels-mem} shows the growth of our data structures and memory usage throughout the execution of our algorithm on the COMPAS dataset.
 The maximum memory usage is 170MB, with the majority of that coming from our prefix trie.
 With about 1 million items active at the peak, this comes out to about 170 bytes per item.
 This includes copies of that item that are kept across the prefix trie, symmetry-aware map, and queue.
@@ -113,16 +117,19 @@ For a modern machine, this is not very much memory, demonstrating further that o
 
 We also run CORELS on the Weapon dataset, which has fewer rules but many more individuals.
 This will cause optimizations that limit the depth of our search---the equivalent points bound, the lookahead bound---to be less important than ones that allow us to prune more aggressively---the priority queue and symmetry-aware map.
-This section demonstrates that while individual optimizations may play a larger role in certain datasets, the entirety of the system allows for speedy computation and certification of the optimal solution.
+The following sections demonstrate that while individual optimizations may play a larger role in certain datasets, the entirety of the system allows for speedy computation and certification of the optimal solution.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=1.1\textwidth]{figs/compas_prefixes.png}
 \end{center}
+\vspace{-1cm}
 \caption{Tracks the number of prefixes of a given length active in the queue for our system when running on the COMPAS dataset.
+Each color represents a different length prefix.
 Each graph represents an experiment run without one of our bounds or data structures.
 This allows us to isolate the critical improvement(s) for a given class of problem.
 The equivalent points bound is especially important for datasets with a large number of rules and relatively few data points.
+Without that bound we our runtime increases dramatically and we examine much longer prefixes.
 }
 \label{fig:compas-prefixes}
 \end{figure}
@@ -131,10 +138,11 @@ The equivalent points bound is especially important for datasets with a large nu
 \begin{center}
 \includegraphics[width=1.1\textwidth]{figs/weapon_prefixes.png}
 \end{center}
+\vspace{-0.7cm}
 \caption{Tracks the number of prefixes of a given length active in the queue for our system when running on the Weapon dataset.
 Each graph represents an experiment run without one of our bounds or data structures.
 This allows us to isolate the critical improvement(s) for a given class of problem.
-The symmetry-aware map and permutation bound are especially important for datasets with few rules but a lot of data points.
+For datasets with few rules but many data points, the symmetry-aware map and permutation bound play a crucial role.
 }
 \label{fig:weapon-prefixes}
 \end{figure}
@@ -143,7 +151,7 @@ The symmetry-aware map and permutation bound are especially important for datase
 
 One of our first optimizations was the use of a priority queue to utilize different exploration techniques. 
 On the COMPAS dataset, using BFS instead of a priority queue does not seem to harm our performance at all, 
-Removing the priority queue from the Weapon dataset, however, and simply using BFS slows down our performance by a factor of 2.
+Removing the priority queue from the Weapon dataset, however, slows down our performance by a factor of 2.
 The queue requires very little memory and can give us a significant speed-up on certain types of problems.
 
 \subsection{Support Bounds}
@@ -151,7 +159,7 @@ The queue requires very little memory and can give us a significant speed-up on 
 The support bounds are intrinsic to the rules and are the first bounds we check in our execution, because they are the simplest to compute.
 Despite this ease of computation, these bounds prevent the pursuit of useless rules.
 Without these bounds we complete the certification in 229s (1.8x) for COMPAS and 153s (1.08x) for Weapon.
-So, these bounds are not crucial for the completion of our algorithm, but they do provide a nice speed-up.
+So, these bounds are not crucial for the completion of our algorithm, but they do provide some speed-up.
 
 \begin{table}[t!]
 \begin{adjustwidth}{-.4in}{-.4in}
@@ -181,8 +189,8 @@ that each remove a specific implementation optimization or bound.
 All rows represent complete executions, except for the symmetry-aware map row,
 in which each execution was terminated due to memory constraints
 }
-\end{adjustwidth}
 \label{tab:weapon}
+\end{adjustwidth}
 \end{table}
 
 \subsection{Symmetry-aware map}
@@ -251,18 +259,18 @@ that each remove a specific implementation optimization or bound.
 All rows represent complete executions, except for the final row,
 in which each execution was terminated due to memory constraints
 }
-\end{adjustwidth}
 \label{tab:compas}
+\end{adjustwidth}
 \end{table}
 %}
 
 \subsection{Equivalent points bound}
-
+\label{exp:ablation-equiv}
 The equivalent points bound is our optimization that provides the largest benefit when we have a large number of rules.
 Since all of our other bounds eliminate prefixes contingent on the lower bound, the equivalent points bound is important because it tightens the lower bound.
 Removing this bound typically makes it impractical to complete real world problems.
-For COMPAS Table \ref{tab:compas} demonstrates that even after halting execution after multiple hours (8780s), there is still a large portion of the search space to be explored.
-This bound plays less of a role for the Weapon dataset, but still remains an important optimization.
+For COMPAS, Table \ref{tab:compas} demonstrates that even after halting execution after multiple hours (8780s), there is still a large portion of the search space to be explored.
+This bound plays less of a role for the Weapon dataset, but still remains an important optimization by giving us a 4x speedup.
 
 \begin{comment}
 \begin{figure}[t!]
@@ -275,6 +283,7 @@ This bound plays less of a role for the Weapon dataset, but still remains an imp
 \end{comment}
 
 \section{Symmetry-aware Map Optimization}
+\label{exp:pmap}
 As one of our two main data structures, the memory usage of our symmetry-aware map is something that was very important to us.
 In early versions of this algorithm, the symmetry-aware map was the most memory-intensive data structure and we would often run out of memory before certifying the optimal rule list.
 Section \ref{exp:ablation-pmap} shows us that running without a symmetry-aware map leads to a much longer runtime, so we needed to find a way to use the symmetry-aware map while reducing memory usage. 
@@ -282,19 +291,19 @@ In the course of a normal execution, our permutation map would grow to be hundre
 Thus, carrying a lot of memory overhead with each node led to excess memory usage and ran us out of memory.
 This section explores some of the techniques we used to address this memory bloat.
 
-Our first instantiation of the symmetry-aware map was an STL map with keys of type STL sets and values of type a pair of an STL vector and a double.
-The first problem is that the STL map is implemented as a red-black tree, meaning every node had the overhead of multiple pointers pointing to its children.
+Our first instantiation of the symmetry-aware map was an STL map with STL sets as keys and a pair of an STL vector and a double as the values.
+One problem is that the STL map is implemented as a red-black tree, meaning every node had the overhead of multiple pointers pointing to its children.
 This can be solved using a STL unordered map, which is implemented as a hashtable.
 That has some overhead, since it will allocate more buckets than are filled, but it has much less overhead than the two pointers per node of overhead of the STL map.
 
 Our original scheme also used the 8 byte size\_t to represent rule ids.
-By assuming that we'll never have more than 65000 rules---which would overtax our algorithm anyways---we were able to use 2 byte unsigned shorts for our rule ids.
+By assuming that we'll never have more than 65,000 rules---which would be intractable for our algorithm anyways---we were able to use 2 byte unsigned shorts for our rule ids.
 This means that our key type, value type, and our node type were able to use only 2 bytes per rule id instead of 8 bytes.
-Since our prefixes often get to be length 5 or greater, saving 6 bytes per rule in every representation of the prefix is a large space saving.
+Since our prefixes often get to be length 5 or greater, saving 6 bytes per rule in every representation of the prefix led to large space savings.
 
 \begin{figure}[t!]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{figs/pmap_types.png}
+\includegraphics[width=0.7\textwidth]{figs/pmap_types.png}
 \end{center}
 \caption{An example prefix (43, 56, 15, 1, 17) and the associated representations in the key and the value types.
 The key is an array of 6 unsigned shorts where the first entry demarcates the length of the prefix.
@@ -307,10 +316,11 @@ For instance, the first entry in the key is 1 and the first entry in the value i
 
 After these initial optimizations, we worked on optimizing our key type.
 The only criteria for our key type is that two different prefixes that are permutations of each other should map to the same key.
-We began by using a STL set as the key because it allowed us to easily determine if two prefixes were permutations of each other by simply inserting into the set.
+We began by using a STL set as the key because it allowed us to easily determine if two prefixes were permutations of each other by simply converting the prefix into a set.
 However, this carries a lot of overhead because a set needs to support insertions, lookups, and deletions in $O(\log n)$ time.
-This overhead varies between compilers, but my machine allocated 32 bytes in total for each 2 byte item inserted into the set, plus 24 bytes for the set itself.
+This overhead varies between compilers, but my machine allocated 32 bytes for each 2 byte item inserted into the set, plus 24 bytes for the set itself.
 For a prefix of length 5, the corresponding key therefore takes up 160 bytes.
+
 Sets support far more operations than we need, though, so we transitioned to a sorted STL vector.
 This still allows us to compare prefixes as permutations, and it reduced overhead because a STL vector is essentially just a dynamically resizing array with a little bit of extra bookkeeping information.
 This translates to a prefix of length 5 taking up only 40 bytes.
@@ -319,7 +329,6 @@ All we needed was some way to compare the canonical orders and determine if they
 We created a custom key class by allocating a chunk of memory that held the length of the prefix and the sorted order of the ids.
 This kept the same idea that the STL vector had in order to compare two prefixes, but it removed the overhead.
 In the end, we use only 12 bytes for the key for a prefix of length 5.
-An example of the custom key class is shown in Fig \ref{fig:pmap-types}.
 
 We went through a similar process with our values for the symmetry-aware map.
 Our only requirement for the values were that they keep track of which prefix was the current best for the given permutation.
@@ -327,17 +336,18 @@ We began with a STL vector to keep track of the actual order of the rules in the
 We reduced our memory usage through a similar technique of what we did with the key type: we moved from a STL vector to a chunk of memory.
 However, we realized that we could do even better because we already had the rule ids---all we need in the value was the ordering of those rules.
 Since we don't need to represent the rule ids, we can use unsigned chars instead of unsigned shorts to record the actual ordering of the rule ids stored in the key type.
-This is shown in Fig \ref{fig:pmap-types}
+Fig \ref{fig:pmap-types} demonstrates how a prefix can be converted into the custom key and value classes that we designed.
 
 \begin{table}[t!]
+\begin{adjustwidth}{-.4in}{-.4in}
 \begin{tabular}{l | c | c | c | c }
 Map version & Key version & Value version & Total Memory (MB) & $t_\text{total}$ (s)\\
 \hline
-Map & Set (size\_t) & STL Vector (size\_t) & 190.7 & 154 \\
-Unordered Map & Set (size\_t) & STL Vector (size\_t) & 185.9 & 150 \\
-Unordered Map & Set  (unsigned short) & STL Vector (unsigned short) & 148.6 & 148 \\
-Unordered Map & STL Vector (unsigned short) & STL Vector (unsigned short) & 68.7 & 147 \\
-Unordered Map & Custom Key & Custom Value & 62.9 & 139 \\
+Map & Set (size\_t) & Vector (size\_t) & 190.7 & 139 \\
+Unordered Map & Set (size\_t) & Vector (size\_t) & 185.9 & 135 \\
+Unordered Map & Set  (short) & Vector (short) & 148.6 & 133 \\
+Unordered Map & Vector (short) & Vector (short) & 68.7 & 132 \\
+Unordered Map & Custom Key & Custom Value & 62.9 & 124 \\
 \end{tabular}
 \vspace{4mm}
 \caption{Symmetry aware map improvements when running on the COMPAS dataset.
@@ -348,74 +358,75 @@ total memory used by the symmetry-aware map, and time of execution.
 %
 Each row represents a different version of the symmetry aware map that we tested.
 We see that each optimization reduced the total memory consumption while maintaining or slightly reducing the overall runtime.
+Short refers to unsigned short and Vector refers to STL Vector.
 }
 \label{tab:pmap}
+\end{adjustwidth}
 \end{table}
 
 In total, Table \ref{tab:pmap} shows us that these improvements give us a 3x memory reduction on this problem.
 These reductions take the symmetry-aware map from being the largest data structure to being smaller than the prefix trie.
 Reducing the memory footprint of CORELS was helpful for running on COMPAS, but on larger problems this memory improvement is even more pronounced.
 
-In Section \ref{sec:pmap} we described two different key types for the symmetry-aware map, but all of the above optimizations pertained only to the PrefixKey type.
-Dealing with the CapturedKey type required a different approach.
-We used the bit vector manipulation library from Yang et al. \cite{YangRuSe16} which was built on top of the GMP library.
-These bit vectors are of the GMP defined type mpz\_t, which stands for multiple precision integer.
-This type allows us represent and perform operations with very large bit vectors in an efficient manner.
-Since unordered\_map is implemented as a hash table, it requires a custom hash for non built-in types.
-We initially wrote a function to convert between mpz\_t and a $std::vector<bool>$ so that we could use STL's built-in hash function.
-This conversion turned out to be very slow, especially when we were running on data sets with many samples.
-These mpz\_t types were fairly large, so copying the information from one place to another was inefficient and impractical.
-Instead, we adapted the sdbm hash function to our mpz\_t type. \cite{HashFunctions}.
-Once we used our own hash function and didn't have to copy between types, CapturedKeys became much faster.
-However, as Fig \ref{fig:prefix-captured} showed, they were still less space efficient that PrefixKeys so we did not pursue them further.
-
-%TODO Integrate
-\begin{figure}[t!]
+\begin{figure}
 	\begin{center}
 	\includegraphics[width=0.8\textwidth]{figs/prefix-captured_pmap_mem.png}
 	\includegraphics[width=0.8\textwidth]{figs/prefix-captured_tree_size.png}
-	\caption{This graph shows the memory usage of the map when using CapturedKeys and PrefixKeys. 
-We see that CapturedKeys provide minimal space savings over PrefixKeys due to the slight decrease in nodes inserted into the trie.}
-	\end{center}
+	\caption{This graph shows the memory usage of the map when using CapturedKeys and PrefixKeys on the COMPAS dataset. 
+We see that CapturedKeys cost much more memory than PrefixKeys despite the slight decrease in the number of nodes inserted into the trie.}
 \label{fig:prefix-captured}
+	\end{center}
 \end{figure}
 
-Indeed, in Fig \ref{fig:prefix-captured}, we find that this occurs in only a few cases, so the size of the map is mostly consistent across different key types.
-As can be seen, CapturedKeys are much more memory intensive than PrefixKeys because they're storing all of the data points instead of just a few rules, so we used PrefixKeys for our later analyses.
+In Section \ref{sec:pmap} we described two different key types for the symmetry-aware map: PrefixKeys and CapturedKeys.
+All of the above optimizations pertained only to the PrefixKey type, so dealing with the CapturedKey type required a different approach.
+To keep track of what data points a rule list captured, we used the bit vector manipulation library from Yang et al.~\cite{YangRuSe16} which was built on top of the GMP library.
+These bit vectors are of the GMP defined type mpz\_t, which stands for multiple precision integer.
+This type allows us represent and perform operations with very large bit vectors in an efficient manner.
+Since unordered\_map is implemented as a hash table, it requires a custom hash for non built-in types.
+We initially wrote a function to convert between mpz\_t and a STL vector containing bools so that we could use STL's built-in hash function.
+This conversion turned out to be very slow, especially when we were running on data sets with many samples.
+These mpz\_t types were fairly large, so copying the information from one place to another was inefficient and impractical.
+Instead, we adapted the sdbm hash function to our mpz\_t type.~\cite{HashFunctions}.
+Once we used our own hash function and didn't have to copy between types, CapturedKeys became much faster.
+Fig \ref{fig:prefix-captured} shows that despite these optimizations, CapturedKeys were still less space efficient that PrefixKeys. 
+CapturedKeys have to store all of the data points instead of just a few rules, so we used PrefixKeys for our later analyses.
 
 %TODO add icache statistics and provide #'s for performance deltas
 \section{Templates vs Inheritance}
-Our system has a lot of different modular parts--various priority metrics, symmetry-aware map types, and different types of information stored in trie nodes.
+Our system has many modular parts---various priority metrics, symmetry-aware map types, and different types of information stored in trie nodes.
 Since we were using C++, we took advantage of its templating system to achieve this modularity.
-We believed that it would be the easiest way to switch out different components of the system, but did not think about the ramifications of this choice.
-Due to code duplication, templates can lead to a much larger executable.
-Indeed, with a pure templating system, our executable was 253,732 bytes.
-Execution time took about 126s on the COMPAS data set.
+We initially believed that it would be the easiest way to switch out different components of the system.
+Due to code duplication, however, templates can lead to a much larger executable.
+Indeed, with a pure templating system, our executable was 253,732 bytes and execution time took about 126s on the COMPAS data set.
 
 An alternative way to maintain modularity was to take advantage of C++'s class system and use inheritance and polymorphism.
-Instead of having a template argument for each data structure, we can have a base data structure type and then implement each of our extensions as subclasses.
+Instead of having a template argument for each data structure, we have a base data structure type and then implement each of our extensions as subclasses.
 Therefore, we can write all of our functions to take the base class as arguments and then pass in the specialized subclasses based on command line arguments.
 This requires the use of virtual functions, which are potentially a bit slower than regular functions, because they require a vtable lookup.
-A vtable, or virtual method table, is how C++ deals with the fact that the compiler might not know what class a variable is at compile time, so at runtime the vtable is used to run the appropriate function.
+A vtable, or virtual method table, is how C++ deals with the fact that the compiler might not know what class a variable is at compile time.
+At runtimem the vtable is used to run the appropriate function, but this requires a bit of overhead.
 With a pure inheritance framework, our executable was 171,288 bytes.
-However, even with the inheritance framework, the runtime of our algorithm was not significantly different from the template runtime.
+However, even with the inheritance framework, the runtime of our algorithm (124s) was not significantly different from the template runtime (126s).
 Thus, since inheritance provided a much cleaner code base to work with, we decided to switch to an inheritance based framework.
 
 \begin{figure}[t!]
 	\begin{center}
 	\includegraphics[width=\textwidth]{figs/parallel_speedup.png}
 	\caption{This graph shows the speedup of our parallel implementation as we add more threads. 
-We see a sub-linear speedup, likely due to cache misses.}
+We see a sub-linear speedup, likely due to cache misses.
+However, we are able to get up to a 6x speedup with 16 cores.
+This puts some large problems that were previously unfeasible in the realm of completion.}
+	\label{fig:parallel}
 	\end{center}
-\label{fig:parallel}
 \end{figure}
 
-%TODO Add parallelization graph and finish writing
 \section{Parallelization}
 Almost every modern machines supports parallelism through the use of multiple cores or simultaneous multi-threading.
-This is a crucial fact that modern discrete optimization programs ought to take advantage of.
-We show that the structure of this problem nicely supports a parallel implementation of our algorithm.
-Furthermore, we show that we get significant, though not linearly-scaling, speed-ups with our parallel implementation.
+This is a crucial fact that modern discrete optimization programs can use to their advantage.
+We show that the structure of our branch and bound algorithm nicely supports a parallel implementation.
+Furthermore, we show that we get significant, though not linearly-scaling, speed-up with our parallel implementation.
+This set of experiments was executed on Harvard's Odyssey cluster to take advantage of multi-core machines.
 
 Analysis of our log files showed that the majority of the time of our program is spent in the incremental section of our execution, shown in Algorithm \ref{alg:incremental}.
 So, we began by trying to parallelize this inner loop of our incremental evaluation.
@@ -423,20 +434,18 @@ This inner loop involves trying to extend a prefix by calculating the bounds for
 In order to add these child rules, though, we need to calculate the bounds based on characteristics of the parent prefix.
 Without locking the parent, we run into a race condition where one thread is trying to insert a child rule into the parent's representation of the children and another thread is trying to read the parent's representation of the children.
 This leads to a segfault in the STL code and could be fixed by locking the appropriate fields in the parent.
-%TODO look into this
 Locking the parent has too much contention, however, because all of our threads needed to own the parent lock at the same time---essentially rendering the loop sequential.
 
-We realized, however, that the tree structure of our search space, encapsulated in our prefix trie, lends itself nicely to parallelization.
+We realized, however, that the tree structure of our search space, encapsulated by our prefix trie, lends itself nicely to parallelization.
 Instead of parallelizing the evaluation of a single prefix, we can parallelize our search over the tree itself.
 We do this by creating the tree in the master thread and then spawning worker threads to work in different parts of the tree.
-Thus, there is no contention on parents since only one thread can access a node at a time.
+Thus, there is no contention on parent nodes since only one thread can access a node at a time.
 The shared state only consists of the minimum objective and the symmetry-aware map, and these are kept in the master thread.
-No locking is necessary on the minimum objective because race conditions don't lead to incorrect execution, just to slightly less efficient execution.
-For the symmetry-aware map, we lock on insertions and lookups because insertions can trigger a rehash of the underlying hashtable, which is problematic if multiple threads are accessing the map. 
-Deletion and garbage collection is handled by the master thread as well.
+%No locking is necessary on the minimum objective because race conditions don't lead to incorrect execution, just to slightly less efficient execution.
+We lock the symmetry-aware map on insertions and lookups because insertions can trigger a rehash of the underlying hashtable, which is problematic if multiple threads are accessing the map. 
+Deletion and garbage collection are handled by the master thread as well.
 
-%TODO find bottleneck and explain
-Fig \ref{fig:parallel} shows that parallelizing our implementation did lead to a speed-up, but we see diminishing returns as we increase the number of threads.
+Fig \ref{fig:parallel} shows that parallelizing our implementation did lead to a significant speed-up, but we see diminishing returns as we increase the number of threads.
 One theory we had was that since we had to add locking to the symmetry-aware map, there might be contention that is slowing down the multi-threaded implementation.
-However, when we preallocate a large symmetry-aware map and don't lock, we see the same type of slowdown, implying that contention is not the issue.
+However, when we preallocate a large symmetry-aware map (avoiding the need to rehash) and don't lock, we see the same type of slowdown, implying that contention is not the issue.
 An alternative explanation is that increasing the number of threads leads to cache thrashing because the appropriate parts of the tree can no longer be kept in memory.

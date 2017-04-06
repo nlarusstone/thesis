@@ -21,7 +21,7 @@
 
 \newthought{This chapter lays out the design and implementation} of the system used to generate optimal rule lists.
 We begin by providing an overview of our algorithm.
-Next, we explore the details of each of the three main data structures used to run our algorithm--a prefix trie, a symmetry-aware map, and a queue. 
+Next, we explore the details of each of the three main data structures used to run our algorithm---a prefix trie, a symmetry-aware map, and a queue. 
 We conclude with a more thorough walkthrough of the implementation of our main algorithm, including a discussion of our garbage collection and memory tracking.
 %We conclude with a discussion of the garbage collection, design tradeoffs, and memory tracking framework used.
 
@@ -30,8 +30,8 @@ We conclude with a more thorough walkthrough of the implementation of our main a
 \label{alg:branch-and-bound}
 \begin{algorithmic}
 \normalsize
-\State \textbf{Input:} A data set and a binary classification problem.
-\State \textbf{Output:} Outputs the best rule list and its objective\\
+\State \textbf{Input:} A dataset and a binary classification problem.
+\State \textbf{Output:} The best rule list and its objective\\
 \State initialize data structures
 \While {rule lists to examine}
 	\State get next rule list
@@ -46,7 +46,7 @@ We conclude with a more thorough walkthrough of the implementation of our main a
 \end{algorithm}
 
 \section{Algorithm overview}
-Algorithm \ref{alg:branch-and-bound} details a pseudocode version of our algorithm, which is based on the a basic branch-and-bound algorithm \cite{LandDo60}.
+Algorithm \ref{alg:branch-and-bound} details a pseudocode version of our branch-and-bound algorithm.
 First, we perform the branching step where we choose a new branch to explore on our search tree by selecting the next rule list to evaluate.
 Next, we evaluate the objective and bounds on this rule list and prune it if possible, allowing us to prune some rule lists and not examine the entire search space.
 Finally, we update the optimal rule list if this rule list is better than the best rule list we have seen---this allows us to perform the bounding step more efficiently.
@@ -63,13 +63,13 @@ At the end of execution, we return the optimal rule list, which is the rule list
 
 \section{Prefix Trie}
 The prefix trie is a custom C++ class and is used as a cache to keep track of rule lists we have already evaluated. 
-Each node represents a rule---see Fig \ref{fig:cache_node} for our class definition of a node--and contains the id and prediction for the rule that the node represents.
-Each leaf node in the trie contains the metadata associated with that corresponding rule list. 
-This metadata includes the following bookkeeping information: viable child rule lists, lower bound, objective, minority misclassification, length, number captured, prediction for default rule, and whether or not this node should be pruned.
-In addition to our base trie class, we implemented two different node types that we use in our algorithm.
-First, we implemented a class that has an additional field that tracks the curiosity of a given prefix as defined in Section \ref{def:curiosity}.
+Each node represents a rule---see Fig \ref{fig:cache_node} for our class definition of a node---that contains the id and prediction for the rule that the node represents.
+Nodes in the trie also contain the metadata associated with that corresponding rule list. 
+This metadata includes the following bookkeeping information: which child rule lists are viable, lower bound, objective, minority misclassification, length, number captured, prediction for default rule, and whether or not this node should be pruned.
+In addition to our base trie class, we also implemented a different node types that we use in our algorithm.
+We implemented a sub-class that has an additional field that tracks the curiosity of a given prefix as defined in Section \ref{def:curiosity}.
 Curiosity is one of several ways we use to order our search space.
-Since the curiosity field is just a double, the memory overhead is minimal and the speed-up of using curiosity as opposed to BFS is sizable (see Section \ref{exp:priority}).
+Since the curiosity field is just a double, the memory overhead is minimal.
 %We also implemented a class that has an additional field keeping track of the captured vector for that prefix.
 %This captured vector has length $nsamples$, which means it is memory expensive.
 %However, using the captured vector allows us to speed up our incremental computations because we would otherwise have to recompute this vector every time we used the prefix.
@@ -78,9 +78,9 @@ Since the curiosity field is just a double, the memory overhead is minimal and t
 \begin{center}
 \includegraphics[width=0.9\textwidth]{figs/compas-queue-cache-size-insertions.png}
 \end{center}
-\caption{Size of prefix trie, logical queue, and physical queue over the execution of our algorithm on COMPAS data set.
+\caption{Size of prefix trie, logical queue, and physical queue over the execution of our algorithm on the COMPAS dataset.
 This dataset has 155 rules and 6489 samples (see Section \ref{def:datasets}).
-The gap between the logical queue and the physical queue is due to our lazy garbage collection}
+The gap between the logical queue and the physical queue is due to our lazy garbage collection.}
 \label{fig:queue_gc}
 \end{figure}
 
@@ -92,13 +92,14 @@ The search process involves selecting which leaf node to explore.
 The stochastic exploration process bypasses the use of a queue by performing random walks on the trie until a leaf is reached.
 Our other scheduling schemes use a STL C++ priority queue to hold and order all of the leaves of the trie that still need to be explored.
 Our priority metrics can be ordered by curiosity, the objective, or the lower bound.
-We find that using an exploitation strategy, such as ordering by curiosity or lower bound, usually leads to a faster runtime than using BFS.
+We find that using an exploitation strategy, such as ordering by lower bound, usually leads to a faster runtime than using BFS.
 
 In C++ the priority queue is a wrapper container that prevents access to the container underlying the queue.
-Therefore we cannot access elements in the middle of the queue, even if we have know the value that we're trying to access..
+Therefore we cannot access elements in the middle of the queue, even if we have know the value that we're trying to access.
 Thus, we run into a problem where we may delete something in the prefix trie that is currently in the queue, as we have no way to update the queue without iterating over every element.
 We address this by lazily marking nodes as deleted in the prefix trie without deleting the physical node until it has been removed from the queue.
-As Fig \ref{fig:queue_gc} shows, this leads to a situation where our logical queue is actually smaller than the physical queue.
+Fig \ref{fig:queue_gc} shows that this leads to a situation where our logical queue is actually smaller than the physical queue.
+However, the difference is minimal and the alternative of iterating over the queue would be very slow.
 
 \section{Symmetry-aware map}
 \label{sec:pmap}
@@ -106,25 +107,26 @@ We implement our symmetry-aware map as an STL unordered\_map, to apply the permu
 We have two different versions of the map with different key types that allow permutations to be compared and pruned.
 In both cases, the values consist of the best lower bound and the actual ordering of the rules that is best for that permutation.
 In the first version, keys to the map are represented as the canonical order of the rules, called PrefixKeys.
-The second version has keys that represent the captured vector, which we call CapturedKeys.
-Our permutation bound is based on the fact that different permutations capture the same data, so both types of key is equivalent for the rule lists (1, 4) and (4, 1).
-Representing keys with captured vectors could potentially match more permutations since two prefixes may not be permutations of each other but might capture the same data points and therefore fall under the permutation bound.
-Despite supporting only one bound, the permutation map plays a significant role in our memory usage.
+The second version has keys that represent what data has been captured, which we call CapturedKeys.
+Our permutation bound is based on the fact that different permutations capture the same data, so both types of key will mark the rule lists (1, 4) and (4, 1) as permutations.
+CapturedKeys could potentially match more permutations since two prefixes may not be permutations of each other but might capture the same data points and therefore fall under the permutation bound.
+However, our analysis in Section \ref{exp:pmap}, shows that this increase in matches is not enough to offset the massive amount of memory needed by the CapturedKeys.
+Despite supporting only one bound, the symmetry-aware map plays a significant role in our memory usage.
 
 \begin{algorithm}[!t]
   \caption{CORELS}
 \label{alg:corels}
 \begin{algorithmic}
 \normalsize
-\State \textbf{Input:} A data set and a binary classification problem.
-\State \textbf{Output:} Outputs the best rule list and its objective.\\
+\State \textbf{Input:} A dataset and a binary classification problem.
+\State \textbf{Output:} The best rule list and its objective.\\
 \State $opt \gets NULL$
 \State $T \gets initializeTree()$
 \State $Q \gets queue(\,[T.root()\,])$
 \State $P \gets map(\{\})$
 \While {$Q$ not empty or $niter == termination$}
 	\State $prefix \gets Q$.pop(\,)
-	\State $newObj \gets$ incremental($prefix, T, Q, P$) \Comment{Finds possible extensions of prefix (defined below)}
+	\State $newObj \gets$ incremental($prefix, T, Q, P$) \Comment{\parbox[t]{.33\linewidth}{Finds possible extensions of prefix (defined below)}}
 	\If {$newObj$ < $T$.minObjective(\,)}
 		\State $opt \gets T$.bestRuleList(\,)
 		\State $T$.garbageCollect(\,)
@@ -171,7 +173,7 @@ symmetry-aware map~$P$
 	\State $notCapZero \gets notCap \wedge T$.zeroLabel(\,)
 	\State $defaultCorr \gets max\{|notCapZero|, |notCap - notCapZero|\}$
 	\State \parbox[t]{.45\linewidth}{$obj \gets lb + \dfrac{|notCap| - defaultCorr}{nsamples}$} \Comment{\parbox[t]{.45\linewidth}{Calculate objective based on lower bound and default rule}}
-	\State $bestObj = min(bestObj, obj)$
+	\State $bestObj = min\{bestObj, obj\}$
 	\If {$obj < T$.minObjective(\,)} \Comment{Update minimum objective}
 		\State $T.minObjective(obj)$
 	\EndIf
@@ -184,6 +186,7 @@ symmetry-aware map~$P$
 		\State $Q.$push($n$)
 	\EndIf
 \EndFor
+\State \Return $bestObj$
 \end{algorithmic}
 \end{algorithm}
 \end{center}
@@ -198,22 +201,24 @@ We can also opt for early termination based on the number of leaves in the trie.
 This prevents us from achieving the certificate of optimality, but can still lead to us finding a good or even optimal rule list.
 Most executions find the optimal rule list quickly, but then certification requires a long time and a large amount of memory.
 Early termination allows us to trade the guarantee of optimality for lower time and memory costs.
+
 %choose to not receive the full certificate of optimality by exiting execution when a certain number of rule lists are in the trie.
 While there are still leaves of the trie to be explored, we use our scheduling policy to select the next prefix to evaluate.
 We pass that prefix to our incremental function, detailed in Algorithm \ref{alg:incremental}.
 For every rule that is not already in this prefix, i.e. rules that we could potentially add to the list, we calculate whether adding that rule to that prefix would create a viable rule list.
-First, we compute how many points the new rule would capture and how many of those it would capture correctly so that we can prune this rule list if it does not capture enough samples correctly.
+First, we compute how many points the new rule would capture and how many of those it would capture correctly to determine if it passes our support bound.
 Then, we calculate the lower bound and prune this rule list if the lower bound is larger than the best objective we have seen.
 Next, we determine the rule list's objective and update our current best objective if necessary.
 If our lower bound is large enough that adding any additional rule will cause the lower bound to be larger than our current best objective, we apply the lookahead bound and do not add the rule list to any of our data structures.
 Finally, we try to add the rule list to our various data structures.
 The symmetry-aware map will take care of the permutation bound, so we only insert the rule list into the prefix trie and queue if it successfully passes the permutation bound.
 %If the new rule list has a lower bound that is better than all of these bounds, only then do we insert it into the permutation map, the prefix tree, and the queue, updating the minimum objective if necessary.
-Otherwise, we do not insert it into any of our data structures, and we continue to the next potential rule.%, having excluded a rule list from being optimal.
-After evaluating all the rules we could add to the current rule list, we return to the main loop and examine the next element in the queue.
+Otherwise, we do not insert it into any of our data structures, and we continue to the next potential rule.
+After evaluating all of the rules we could add to the current rule list, we return to the main loop and examine the next element in the queue.
+Upon clearing our queue, we return the optimal rule list and its objective value.
 
 \section{Garbage Collection}
-Every time we update the minimum objective, we garbage collect the trie, by traversing from the root to the leaves.
+Every time we update the minimum objective, we garbage collect the trie by traversing from the root to the leaves.
 Any time we encounter a node with a lower bound larger than the minimum objective, we delete its entire subtree.
 In addition, if we encounter a node with no children, we prune upwards---deleting that node and recursively traversing the tree towards the root, deleting any childless nodes.
 This garbage collection allows us to limit the memory usage of the trie.
@@ -224,9 +229,8 @@ Throughout our development of CORELS, we often ran into the problem that larger 
 Therefore, we wanted to institute data structure optimizations that would reduce the memory burden of our algorithm.
 In order to achieve this goal, we needed to implement a way of tracking how much memory our program was using and where it was being used.
 We track memory through the use of C++11 custom allocators.
-Our allocators are simple malloc wrappers that log which data structure the allocation is coming from--the trie, the map, or the queue.
+Our allocators are simple malloc wrappers that log which data structure the allocation is coming from---the trie, the map, or the queue.
 We validated the accuracy of this memory tracking by running the program under Valgrind's Massif heap profiler tool and comparing the outputs.
-Our outputs matched Valgrind's to within a few tenths of a percentage points, so we concluded that our memory tracking was successful.
-On a limited run of the bcancer data set, Valgrind's tool Massif reported that we used 98.7 MB, while our data structure tracking recorded 98.5 MB, a difference of 0.2\% which is easily explained by miscellaneous heap allocations.
+Our outputs matched Valgrind's to within a few tenths of a percentage points, so we concluded that our memory tracking was successful: on a limited run of the COMPAS dataset, Valgrind's tool Massif reported that we used 98.7 MB, while our data structure tracking recorded 98.5 MB, a difference of 0.2\% which can be explained by heap allocations not related to our main data structures.
 The heap profiling of Valgrind has a large overhead, while our memory logging has minimal overhead.
-This allows us to output our memory usage per data structure on a regular basis without incurring the large overhead of Valgrind.
+Our custom memory logging allows us to output our memory usage per data structure on a regular basis without incurring the large overhead of Valgrind.

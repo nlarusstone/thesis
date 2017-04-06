@@ -36,8 +36,8 @@
     \newcommand{\dnormalspacing}{1.0}
     \newcommand{\dcompressedspacing}{1.0}
 }{
-    \newcommand{\dnormalspacing}{2.0}
-    \newcommand{\dcompressedspacing}{1.2}
+    \newcommand{\dnormalspacing}{1.15}
+    \newcommand{\dcompressedspacing}{1.0}
 }
 
 % Block quote with compressed spacing
@@ -301,6 +301,7 @@
         \bibliographystyle{apalike2}
         %\include{endmatter/colophon}
     \end{spacing}
+   % \clearpage
     \begin{appendices}
         \include{chapters/appendixA}
     \end{appendices}
@@ -311,9 +312,10 @@
 \usepackage{algorithm}
 %\usepackage[ruled,noend]{algorithm2e}
 \usepackage[noend]{algpseudocode}
-\usepackage{amsmath,amsthm}
+\usepackage{amsmath,amsthm,amsfonts}
 %\usepackage{amsfonts}
 %\usepackage{caption}
+\usepackage{dsfont}
 \usepackage{comment}
 \usepackage{fullwidth}
 %\usepackage{graphicx,verbatim}
@@ -327,8 +329,16 @@
 
 %\renewcommand{\cite}{\citation}
 
-\newcommand{\x}{\mathbf{x}}
+%\newcommand{\x}{\mathbf{x}}
 \def\bif{\bf if~}
 \def\belif{{\bf else if~}}
 \def\bthen{{\bf then predict~}}
 \def\belse{{\bf else predict~}}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{claim}{Claim}
+\newtheorem{corollary}{Corollary}
